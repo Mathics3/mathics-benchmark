@@ -1,0 +1,52 @@
+# The goal here is to understand costs of some simple primitive builtins
+# there are two dimensions by which we want to understand this:
+# how a primitive grows as a function of the size of its parameter and
+# how a efficient a primitive is compared to other things of its class.
+
+# Default number of iterations
+iterations: 500
+
+categories:
+  Plus:
+    exprs:
+      - '1 + 2'
+      - '1 + 2 + 3'
+      - '1 + 2 + b'
+      - 'a + b + 3'
+      - '1234567890 + 2345678901'
+      - 'a + b + 4.5 + a'
+
+  Times:
+    exprs:
+      - '1 * 2'
+      - '1 * 2 * 3'
+      - '1 * 2 * b'
+      - 'a * b * 3'
+      - '1234567890 * 2345678901'
+      - 'a * b * 4.5 * a'
+
+  Divide:
+    exprs:
+      - '1 / 2'
+      - '1 / 2 / 3'
+      - '1 / 2 / b'
+      - 'a / b / 3'
+      - '1234567890 / 2345678901'
+      - 'a / b / 4.5' # cut down last divide by a
+
+  Power:
+    exprs:
+      - '1 ^ 2'
+      - '1 ^ 2 ^ 3'
+      - '1 ^ 2 ^ b'
+      - 'a ^ b ^ 3'
+      - '12345 ^ 23456'  # cut down number of digits
+      - 'a ^ b ^ 4.5 ^ a'
+
+  Sqrt:
+    exprs:
+      - 'Sqrt[2]'
+      - 'Sqrt[Sqrt[2], 3]'
+      - 'Sqrt[Sqrt[2], b]'
+      - 'Sqrt[Sqrt[Sqrt[2], b], 3]'
+      - 'Sqrt[1234567890]'
