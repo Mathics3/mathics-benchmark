@@ -1,18 +1,9 @@
 """Runs a particular benchmark.
 
 Example:
-  python ./bench.py  -v ../benchmarks/bench-1565.yaml  ../results/bench-1565.json
+  python ./mathics_benchmark/bench.py -v bench-1565
 """
 
-# TODO:
-#  option to specify git revision which could be HEAD or a tag or a number.
-#     That revision should be used to ensure that version is checkout out.
-#  option to specify more than one git revision
-#  redo output file names so it can be based on input YAML. For example:
-#      for the ../benchmarks/bench-1565.yaml we might automatically generate output file name:
-#         ../results/8a90e5/bench-1565.json
-#      creating the directory ../results/8a90e5 when if it is not there.
-#
 # Outside of this program: setup virtual environments to test Mathics on
 
 from git import Repo
@@ -80,15 +71,14 @@ def get_info(repo) -> dict:
     "Can be supplied multiple times to increase verbosity.",
 )
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
-@click.argument("output", nargs=1, type=click.Path(writable=True), required=False)
-def main(verbose: int, input: str, output: str):
-    bench_data = yaml.load(open(input, "r"), Loader=yaml.FullLoader)
+def main(verbose: int, input: str):
+    bench_data = yaml.load(open(f"benchmarks/{input}.yaml", "r"), Loader=yaml.FullLoader)
     repo = setup_git()
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
     timings = run_benchmark(bench_data, verbose)
 
-    dump_info(repo, timings, verbose, output)
+    dump_info(repo, timings, verbose, f"results/{input}.json")
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
@@ -120,7 +110,6 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
 
 default_git_repo = str(Path(get_srcdir()).parent / Path("Mathics"))
 def setup_git(repo_path: str=default_git_repo):
-    os.chdir(repo_path)
     repo = Repo(repo_path)
     return repo
 
