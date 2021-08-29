@@ -1,0 +1,29 @@
+# The goal here is to understand the time difference between
+# "ExampleFunction[var_?Type]" versus
+# "ExampleFunction[var_Type]" when this appears in Python Builtin code.
+#
+# Commit fe6b5dc3756f52a0bca003d59138a4ceb5b73848 is an
+# example that does just this.
+# Commit is a commit 7716c432c8cbd3dc5ae56e3a78259dde1780781f that
+# appears before this.
+#
+# Note that in this benchmark we want to try to pick functions that
+# run reasonably quickly so we can detect that behavior of _Type vs
+# _?Type which can be small compared to the cost of time-consuming
+# functions. So we need to be selective thin the SHAs given above.
+
+# Default number of iterations
+iterations: 500
+
+categories:
+  BlankVsBlankQ:
+    iterations: 500  # Note that this can be set separate from the global value
+    comment: "Older Mathics uses var_?Type instead of better var_Type"
+    exprs:
+      # _StringQ
+      - 'Environment["HOME"]'
+      - 'Environment["I bet this does not exist"]'
+      - 'SplitBy[{2, 1, 1.2}, Round]'
+      # _ListQ
+      - 'ContainsOnly[{}, {a, b, c}]'
+      - 'ContainsOnly[{b, a, d}, {a, b, c}]'

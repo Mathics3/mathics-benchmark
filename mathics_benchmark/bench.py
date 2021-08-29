@@ -62,7 +62,7 @@ def get_srcdir():
 
 def get_info(repo) -> dict:
     info = {
-        "git SHA": repo.head.commit.hexsha[:6],
+        "git SHA": repo.commit().hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
         # "Mathics-version":  ???
@@ -121,10 +121,7 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
 default_git_repo = str(Path(get_srcdir()).parent / Path("Mathics"))
 def setup_git(repo_path: str=default_git_repo):
     os.chdir(repo_path)
-    repo = Repo(repo_path)
-    head = repo.head
-    master = head.reference
-    return repo
+    return Repo(repo_path)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,12 @@
 # Testing https://github.com/mathics/Mathics/pull/1565
 # Pattern matching improvements for
 
+# Default number of iterations
 iterations: 500
 
 categories:
   CubeRoot:
-    iterations: 500
+    iterations: 500  # Note that this can be set separate from the global value
     exprs:
       # The below are ordered roughly from fastest to slowest
       - CubeRoot[b]
