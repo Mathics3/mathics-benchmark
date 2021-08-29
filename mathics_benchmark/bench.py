@@ -62,7 +62,7 @@ def get_srcdir():
 
 def get_info(repo) -> dict:
     info = {
-        "git SHA": repo.commit().hexsha[:6],
+        "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
         # "Mathics-version":  ???
