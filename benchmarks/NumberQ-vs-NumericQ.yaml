@@ -1,0 +1,29 @@
+# Benchmark the time difference between NumericQ and NumberQ
+
+# The default number of iterations used in tests below
+iterations: 500
+
+categories:
+  NumberQ:
+    exprs:
+      # The below are ordered roughly from fastest to slowest
+      - NumberQ[2]
+      - NumberQ["x"]
+      - NumberQ[x]
+      - NumberQ[Pi]
+      - NumberQ[{1, 2}]
+      - NumberQ[5!]
+      - NumberQ[3+I]
+      - NumberQ[Sqrt[Pi]]
+
+  NumericQ:
+    exprs:
+      # The below is the same order as above.
+      - NumericQ[2]
+      - NumericQ["x"]
+      - NumericQ[x]
+      - NumericQ[Pi]
+      - NumericQ[{1, 2}]
+      - NumericQ[3+I]
+      - NumericQ[5!]
+      - NumericQ[Sqrt[Pi]]
