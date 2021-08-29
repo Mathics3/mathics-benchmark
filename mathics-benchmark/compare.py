@@ -9,42 +9,45 @@ import matplotlib.pyplot as plt
 session = MathicsSession(add_builtin=True, catch_interrupt=False)
 number = 100
 
-times = []
+old_times = []
+new_times = []
 
 with open("bump", "r") as file:
     for key, value in expressions.items():
         expr = parse(session.definitions, MathicsSingleLineFeeder(value))
 
-        times.append(float(file.readline()) - timeit.timeit(lambda: expr.evaluate(session.evaluation), number=number))
+        old_times.append(float(file.readline()))
+        new_times.append(timeit.timeit(lambda: expr.evaluate(session.evaluation), number=number))
 
 # biggest 5 differences in seconds
-top_5 = [0, 0, 0, 0, 0]
-for time in times:
-    for i in range(5):
-        if abs(time) > abs(top_5[i]):
-            top_5[i] = time
+differences = [abs(old_time - new_time) for old_time, new_time in zip(old_times, new_times)]
 
-top_5_percentage = []
-old_time = []
+top_5_differences = sorted(differences, reverse=True)[:5]
+
+top_5_indices = [
+    differences.index(top_5_differences[0]),
+    differences.index(top_5_differences[1]),
+    differences.index(top_5_differences[2]),
+    differences.index(top_5_differences[3]),
+    differences.index(top_5_differences[4]),
+]
+
+old_times_5 = []
+new_times_5 = []
 names = []
 
-for time, i in enumerate(top_5):
-    if time == 0:
-        break
+for index in top_5_indices:
+    old_times_5.append(old_times[index])
+    new_times_5.append(new_times[index])
 
-    old_time.append(times[times.index(time)])
-
-    # difference in percentage of old and new
-    top_5_percentage.append(1 - old_time/time)
-
-    names.append(expressions[times.index(time)])
+    names.append(list(expressions)[index])
 
 x = np.arange(len(names))  # the label locations
 width = 0.35  # the width of the bars
 
 fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, old_time, width, label='old')
-rects2 = ax.bar(x + width/2, time, width, label='new')
+rects1 = ax.bar(x - width/2, old_times_5, width, label='old')
+rects2 = ax.bar(x + width/2, new_times_5, width, label='new')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 ax.set_ylabel('seconds')
