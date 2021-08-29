@@ -1,0 +1,3 @@
+[submodule "Mathics"]
+	path = Mathics
+	url = https://github.com/mathics/Mathics.git

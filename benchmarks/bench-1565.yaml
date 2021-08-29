@@ -1,0 +1,56 @@
+# Testing https://github.com/mathics/Mathics/pull/1565
+# Pattern matching improvements for
+
+iterations: 500
+
+categories:
+  CubeRoot:
+    iterations: 500
+    exprs:
+      # The below are ordered roughly from fastest to slowest
+      - CubeRoot[b]
+      - CubeRoot[8]
+      - CubeRoot[-5]
+      - CubeRoot[-5.1]
+      - CubeRoot[-510000]
+
+  DateString:
+    iterations: 500
+    exprs:
+      - DateString[{1991, 10, 31, 0, 0}, {"Day", " ", "MonthName", " ", "Year"}]
+      - DateString[{"06/06/1991", {"Month", "Day", "Year"}}]
+      - DateString[{"06/06/1991", {"Month", "/", "Day", "/", "Year"}}]
+      - DateString[]
+      - DateString[{"DayName", "  ", "Month", "/", "YearShort"}]
+      - DateString[{2007, 4, 15, 0}]
+
+# FileNameJoin: x
+# ToFileName: x
+# NumberForm: x
+# RandomInteger: x
+# RandomReal: x
+# SplitBy: x
+
+#-----------------------------------
+
+# #Cases: x is really Solve
+# Minimize: x
+# Maximize: x
+# ElementData: x
+# MakeBoxes: x
+# Quantity: x
+# Environment: x
+# Run: x
+
+# # RandomInteger: x
+# # Subsets: x
+# # ContainsOnly: x
+
+# # FromContinuedFraction: x
+
+# # Cylinder: x
+# # UniformPolyhedron: x
+# # Dodecahedron: x
+# # Isohedron: x
+# # Tetrahedron: x
+# # ImageImport: x
