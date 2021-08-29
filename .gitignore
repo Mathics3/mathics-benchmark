@@ -1,5 +1,5 @@
 /.python-version
 /Mathics_benchmark.egg-info
-/results
+/results/*.json
 __pycache__
 tmp

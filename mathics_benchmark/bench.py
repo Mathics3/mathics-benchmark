@@ -32,7 +32,7 @@ import yaml
 from mathics.session import MathicsSession
 from mathics.core.parser import parse, MathicsSingleLineFeeder
 
-def dump_info(git_repo, timings: dict, verbose: int, output_path: Optional[str]):
+def dump_info(git_repo, timings: dict, verbose: int, output_path: Optional[str]) -> None:
     """Write gathered data if `output_path` given. Otherwise if verbose > 0,
     just print out the gathered data.
 
@@ -53,7 +53,7 @@ def dump_info(git_repo, timings: dict, verbose: int, output_path: Optional[str])
     json.dump(dump_info, open(output_path, "w"))
 
 
-def get_srcdir():
+def get_srcdir() -> str:
     """Retrieve the source directory of this program.
     We generally use that to find relative paths/parts of this code.
     """
@@ -81,7 +81,7 @@ def get_info(repo) -> dict:
 )
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("output", nargs=1, type=click.Path(writable=True), required=False)
-def main(verbose: int, input, output):
+def main(verbose: int, input: str, output: str):
     bench_data = yaml.load(open(input, "r"), Loader=yaml.FullLoader)
     repo = setup_git()
     if verbose:
@@ -121,7 +121,8 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
 default_git_repo = str(Path(get_srcdir()).parent / Path("Mathics"))
 def setup_git(repo_path: str=default_git_repo):
     os.chdir(repo_path)
-    return Repo(repo_path)
+    repo = Repo(repo_path)
+    return repo
 
 
 if __name__ == "__main__":
