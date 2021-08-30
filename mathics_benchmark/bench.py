@@ -89,8 +89,8 @@ def main(verbose: int, pull: bool, input: str, head: Optional[str]):
 
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
-    timings = run_benchmark(bench_data, verbose)
 
+    timings = run_benchmark(bench_data, verbose)
     dump_info(repo, timings, verbose, f"results/{input}.json")
 
     if head:
@@ -98,11 +98,11 @@ def main(verbose: int, pull: bool, input: str, head: Optional[str]):
 
         if verbose:
             print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
-        timings = run_benchmark(bench_data, verbose)
-        
-        repo.git.checkout("master")
 
+        timings = run_benchmark(bench_data, verbose)
         dump_info(repo, timings, verbose, f"results/{input}_{head}.json")
+
+        repo.git.checkout("master")
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the

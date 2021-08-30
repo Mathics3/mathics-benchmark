@@ -1,0 +1,46 @@
+# Testing https://github.com/mathics/Mathics/pull/1567
+# Pattern matching improvements for
+
+# Default number of iterations
+iterations: 10000
+
+categories:
+  StringQ:
+    exprs:
+      # The below are ordered roughly from fastest to slowest
+      - ElementData["Gold", "AtomicNumber"]
+
+  NextPrime:
+    exprs:
+      - NextPrime[1, 1]
+
+# FileNameJoin: x
+# ToFileName: x
+# NumberForm: x
+# RandomInteger: x
+# RandomReal: x
+# SplitBy: x
+
+#-----------------------------------
+
+# #Cases: x is really Solve
+# Minimize: x
+# Maximize: x
+# ElementData: x
+# MakeBoxes: x
+# Quantity: x
+# Environment: x
+# Run: x
+
+# # RandomInteger: x
+# # Subsets: x
+# # ContainsOnly: x
+
+# # FromContinuedFraction: x
+
+# # Cylinder: x
+# # UniformPolyhedron: x
+# # Dodecahedron: x
+# # Isohedron: x
+# # Tetrahedron: x
+# # ImageImport: x

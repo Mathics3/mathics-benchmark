@@ -1,0 +1,11 @@
+# Testing https://github.com/mathics/Mathics/pull/1567
+# Pattern matching improvements for
+
+# Default number of iterations
+iterations: 10000
+
+categories:
+  Rational:
+    exprs:
+      - Rational[10, 1]
+      - Rational[2, 3]
