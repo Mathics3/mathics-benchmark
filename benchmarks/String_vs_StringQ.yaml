@@ -1,0 +1,33 @@
+# The goal here is to understand the time difference between
+# "_String' vs _?StringQ
+
+# Default number of iterations
+iterations: 500
+
+categories:
+  StringConst:
+    comment: "String with constant"
+    exprs:
+      - MatchQ["ww",_String]
+      - MatchQ["ww",_?StringQ]
+
+  StringVariable:
+    comment: "String with variable"
+    exprs:
+      - MatchQ[s,_String]
+      - MatchQ[s,_?StringQ]
+
+  StringPlainSymbol:
+    exprs:
+      - MatchQ[L,_String]
+      - MatchQ[L,_?StringQ]
+
+  StringRealNumber:
+    exprs:
+      - MatchQ[27.231212,_String]
+      - MatchQ[27.231212,_?StringQ]
+
+  Expression:
+    exprs:
+      - MatchQ[Sqrt[1+F[G[t]]],_String]
+      - MatchQ[Sqrt[1+F[G[t]]],_?StringQ]
