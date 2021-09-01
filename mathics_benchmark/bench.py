@@ -70,15 +70,39 @@ def get_info(repo) -> dict:
     help="verbosity level in tracing.\n"
     "Can be supplied multiple times to increase verbosity.",
 )
+@click.option(
+    "-p",
+    "--pull",
+    help="Update the Mathics repository",
+    is_flag=True,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
-def main(verbose: int, input: str):
+@click.argument("head", nargs=1, type=click.Path(readable=True), required=False)
+def main(verbose: int, pull: bool, input: str, head: Optional[str]):
     bench_data = yaml.load(open(f"benchmarks/{input}.yaml", "r"), Loader=yaml.FullLoader)
     repo = setup_git()
+
+    repo.git.checkout("master")
+
+    if pull:
+        repo.remotes.origin.pull()
+
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
     timings = run_benchmark(bench_data, verbose)
 
     dump_info(repo, timings, verbose, f"results/{input}.json")
+
+    if head:
+        repo.git.checkout(head)
+
+        if verbose:
+            print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
+        timings = run_benchmark(bench_data, verbose)
+        
+        repo.git.checkout("master")
+
+        dump_info(repo, timings, verbose, f"results/{input}_{head}.json")
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
