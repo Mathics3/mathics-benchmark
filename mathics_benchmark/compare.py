@@ -1,64 +1,66 @@
-import timeit
-from mathics.session import MathicsSession
-from mathics.core.parser import parse, MathicsSingleLineFeeder
-from expressions import expressions
-from functools import reduce
+"""Generate a bar plot for a particular benchmark.
+
+Example:
+  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+import click
+import sys
 
-session = MathicsSession(add_builtin=True, catch_interrupt=False)
-number = 100
+@click.command()
+@click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
+@click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
+@click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
+def main(input: str, ref1: str, ref2: str):
+    sha_1: str
+    sha_2: str
 
-old_times = []
-new_times = []
+    names = []
+    ref1_times = []
+    ref2_times = []
 
-with open("bump", "r") as file:
-    for key, value in expressions.items():
-        expr = parse(session.definitions, MathicsSingleLineFeeder(value))
+    with open(f"results/{input}_{ref1}.json") as file:
+        object = json.load(file)
 
-        old_times.append(float(file.readline()))
-        new_times.append(timeit.timeit(lambda: expr.evaluate(session.evaluation), number=number))
+        sha_1 = object['info']['git SHA']
 
-# biggest 5 differences in seconds
-differences = [abs(old_time - new_time) for old_time, new_time in zip(old_times, new_times)]
+        for group in object['timings']:
+            for name in object['timings'][group]:
+                ref1_times.append(object['timings'][group][name][1] / object['timings'][group][name][0])
 
-top_5_differences = sorted(differences, reverse=True)[:5]
+    path = f"results/{input}.json" if ref2 == "master" else f"results/{input}_{ref2}.json"
 
-top_5_indices = [
-    differences.index(top_5_differences[0]),
-    differences.index(top_5_differences[1]),
-    differences.index(top_5_differences[2]),
-    differences.index(top_5_differences[3]),
-    differences.index(top_5_differences[4]),
-]
+    with open(path) as file:
+        object = json.load(file)
 
-old_times_5 = []
-new_times_5 = []
-names = []
+        sha_2 = object['info']['git SHA']
 
-for index in top_5_indices:
-    old_times_5.append(old_times[index])
-    new_times_5.append(new_times[index])
+        for group in object['timings']:
+            for name in object['timings'][group]:
+                names.append(name)
+                ref2_times.append(object['timings'][group][name][1] / object['timings'][group][name][0])
 
-    names.append(list(expressions)[index])
+    x = np.arange(len(names))  # the label locations
+    width = 0.35  # the width of the bars
 
-x = np.arange(len(names))  # the label locations
-width = 0.35  # the width of the bars
+    fig, ax = plt.subplots()
+    rects1 = ax.barh(x - width/2, ref1_times, width, label=f"{ref1} - {sha_1}")
+    rects2 = ax.barh(x + width/2, ref2_times, width, label=f"{ref2} - {sha_2}")
 
-fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, old_times_5, width, label='old')
-rects2 = ax.bar(x + width/2, new_times_5, width, label='new')
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_xlabel("seconds")
+    ax.set_title(input)
+    ax.set_yticks(x)
+    ax.set_yticklabels(names)
+    ax.legend()
 
-# Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('seconds')
-ax.set_title('new vs old')
-ax.set_xticks(x)
-ax.set_xticklabels(names)
-ax.legend()
+    fig.tight_layout()
 
-ax.bar_label(rects1, padding=3)
-ax.bar_label(rects2, padding=3)
+    plt.savefig("report.png")
 
-fig.tight_layout()
-
-plt.savefig('report.png')
+if __name__ == "__main__":
+    main(sys.argv[1:])
