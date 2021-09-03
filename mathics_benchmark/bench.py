@@ -1,7 +1,14 @@
 """Runs a particular benchmark.
 
-Example:
+Examples:
+- Runs a benchmark in master:
+  python ./mathics_benchmark/bench.py bench-1565
+- Runs a benchmark in a specifc head:
+  python ./mathics_benchmark/bench.py bench-1565 quickpatterntest2
+- Runs a benchmark with verbose output:
   python ./mathics_benchmark/bench.py -v bench-1565
+- Pull before running the benchmark:
+  python ./mathics_benchmark/bench.py -p bench-1565
 """
 
 # Outside of this program: setup virtual environments to test Mathics on
