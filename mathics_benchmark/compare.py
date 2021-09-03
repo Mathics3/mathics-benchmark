@@ -2,15 +2,15 @@
 
 Examples:
 - Compare a head against master:
-  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest
 - Compare two heads:
-  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
-  python ./mathics_benchmark/bench.py calculator-fns improve-rational-performance
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest improve-rational-performance
 - Compare specific group:
-  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -g Power
+- Compare without showing the percentage difference:
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -c
+- Pull before running the benchmark:
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -p
 """
 
 import numpy as np
@@ -18,6 +18,9 @@ import matplotlib.pyplot as plt
 import json
 import click
 import sys
+import bench
+
+import os.path as osp
 
 from typing import Optional
 
@@ -34,10 +37,23 @@ from typing import Optional
     help="Don't show the difference percentage",
     is_flag=True,
 )
+@click.option(
+    "-p",
+    "--pull",
+    help="Update the Mathics repository",
+    is_flag=True,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
-def main(group: Optional[str], clean: bool, input: str, ref1: str, ref2: str):
+def main(
+    group: Optional[str],
+    clean: bool,
+    pull: bool,
+    input: str,
+    ref1: str,
+    ref2: str,
+):
     sha_1: str
     sha_2: str
 
@@ -45,7 +61,17 @@ def main(group: Optional[str], clean: bool, input: str, ref1: str, ref2: str):
     ref1_times = []
     ref2_times = []
 
-    with open(f"results/{input}_{ref1}.json") as file:
+    path = f"results/{input}_{ref1}.json"
+
+    if not osp.isfile(path):
+        arguments = [input, ref1]
+
+        if pull:
+            arguments.append("-p")
+
+        bench.main(arguments)
+
+    with open(path) as file:
         object = json.load(file)
 
         sha_1 = object["info"]["git SHA"]
@@ -73,6 +99,17 @@ def main(group: Optional[str], clean: bool, input: str, ref1: str, ref2: str):
     path = (
         f"results/{input}.json" if ref2 == "master" else f"results/{input}_{ref2}.json"
     )
+
+    if not osp.isfile(path):
+        arguments = [input]
+
+        if ref2 != "master":
+            arguments.append(ref2)
+
+        if pull:
+            arguments.append("-p")
+
+        bench.main(arguments)
 
     with open(path) as file:
         object = json.load(file)
