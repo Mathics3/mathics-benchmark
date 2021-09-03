@@ -3,3 +3,4 @@
 /results/*.json
 __pycache__
 tmp
+report.png

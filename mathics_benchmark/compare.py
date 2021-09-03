@@ -1,64 +1,155 @@
-import timeit
-from mathics.session import MathicsSession
-from mathics.core.parser import parse, MathicsSingleLineFeeder
-from expressions import expressions
-from functools import reduce
+"""Generate a bar plot for a particular benchmark.
+
+Examples:
+- Compare a head against master:
+  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest
+- Compare two heads:
+  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
+  python ./mathics_benchmark/bench.py calculator-fns improve-rational-performance
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest improve-rational-performance
+- Compare specific group:
+  python ./mathics_benchmark/bench.py calculator-fns quickpatterntest
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -g Power
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+import click
+import sys
 
-session = MathicsSession(add_builtin=True, catch_interrupt=False)
-number = 100
+from typing import Optional
 
-old_times = []
-new_times = []
 
-with open("bump", "r") as file:
-    for key, value in expressions.items():
-        expr = parse(session.definitions, MathicsSingleLineFeeder(value))
+@click.command()
+@click.option(
+    "-g",
+    "--group",
+    help="If passed generate the plot only for the queries in that group",
+)
+@click.option(
+    "-c",
+    "--clean",
+    help="Don't show the difference percentage",
+    is_flag=True,
+)
+@click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
+@click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
+@click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
+def main(group: Optional[str], clean: bool, input: str, ref1: str, ref2: str):
+    sha_1: str
+    sha_2: str
 
-        old_times.append(float(file.readline()))
-        new_times.append(timeit.timeit(lambda: expr.evaluate(session.evaluation), number=number))
+    queries = []
+    ref1_times = []
+    ref2_times = []
 
-# biggest 5 differences in seconds
-differences = [abs(old_time - new_time) for old_time, new_time in zip(old_times, new_times)]
+    with open(f"results/{input}_{ref1}.json") as file:
+        object = json.load(file)
 
-top_5_differences = sorted(differences, reverse=True)[:5]
+        sha_1 = object["info"]["git SHA"]
 
-top_5_indices = [
-    differences.index(top_5_differences[0]),
-    differences.index(top_5_differences[1]),
-    differences.index(top_5_differences[2]),
-    differences.index(top_5_differences[3]),
-    differences.index(top_5_differences[4]),
-]
+        if group:
+            for query in object["timings"][group]:
+                queries.append(query)
 
-old_times_5 = []
-new_times_5 = []
-names = []
+                # The time diveded by the number of interations.
+                ref1_times.append(
+                    object["timings"][group][query][1]
+                    / object["timings"][group][query][0]
+                )
+        else:
+            for queries_group in object["timings"]:
+                for query in object["timings"][queries_group]:
+                    queries.append(query)
 
-for index in top_5_indices:
-    old_times_5.append(old_times[index])
-    new_times_5.append(new_times[index])
+                    # The time diveded by the number of interations.
+                    ref1_times.append(
+                        object["timings"][queries_group][query][1]
+                        / object["timings"][queries_group][query][0]
+                    )
 
-    names.append(list(expressions)[index])
+    path = (
+        f"results/{input}.json" if ref2 == "master" else f"results/{input}_{ref2}.json"
+    )
 
-x = np.arange(len(names))  # the label locations
-width = 0.35  # the width of the bars
+    with open(path) as file:
+        object = json.load(file)
 
-fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, old_times_5, width, label='old')
-rects2 = ax.bar(x + width/2, new_times_5, width, label='new')
+        sha_2 = object["info"]["git SHA"]
 
-# Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('seconds')
-ax.set_title('new vs old')
-ax.set_xticks(x)
-ax.set_xticklabels(names)
-ax.legend()
+        if group:
+            for query in object["timings"][group]:
+                # The time diveded by the number of interations.
+                ref2_times.append(
+                    object["timings"][group][query][1]
+                    / object["timings"][group][query][0]
+                )
+        else:
+            for queries_group in object["timings"]:
+                for query in object["timings"][queries_group]:
+                    # The time diveded by the number of interations.
+                    ref2_times.append(
+                        object["timings"][queries_group][query][1]
+                        / object["timings"][queries_group][query][0]
+                    )
 
-ax.bar_label(rects1, padding=3)
-ax.bar_label(rects2, padding=3)
+    x = np.arange(len(queries))  # the label locations
+    width = 0.35  # the width of the bars
 
-fig.tight_layout()
+    fig, ax = plt.subplots()
+    rects1 = ax.barh(
+        x - width / 2,
+        ref1_times,
+        width,
+        label=f"{ref1} - {sha_1}",
+        color=("steelblue" if clean else "deepskyblue"),
+    )
+    rects2 = ax.barh(
+        x + width / 2,
+        ref2_times,
+        width,
+        label=f"{ref2} - {sha_2}",
+        color=("darkorange" if clean else "sandybrown"),
+    )
 
-plt.savefig('report.png')
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_xlabel("seconds")
+    ax.set_title(input)
+    ax.set_yticks(x)
+    ax.set_yticklabels(queries)
+    ax.legend()
+
+    if not clean:
+        ax.bar_label(
+            rects1,
+            labels=[
+                # Only shows the percentage of difference if the it isn't small and is positive.
+                ""
+                if 0 <= a - b <= 0.0001 or a - b < 0
+                else f"{(a - b) / b * 100:+.2f}%"
+                for a, b in zip(ref1_times, ref2_times)
+            ],
+            color="red",
+        )
+
+        ax.bar_label(
+            rects1,
+            labels=[
+                # Only shows the percentage of difference if the it isn't small and is negative.
+                ""
+                if -0.0001 <= a - b <= 0 or a - b > 0
+                else f"{(a - b) / b * 100:+.2f}%"
+                for a, b in zip(ref1_times, ref2_times)
+            ],
+            color="green",
+        )
+
+    fig.tight_layout()
+
+    plt.savefig("report.png")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
