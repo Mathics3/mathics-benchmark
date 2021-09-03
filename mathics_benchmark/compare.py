@@ -28,10 +28,16 @@ from typing import Optional
     "--group",
     help="If passed generate the plot only for the queries in that group",
 )
+@click.option(
+    "-c",
+    "--clean",
+    help="Don't show the difference percentage",
+    is_flag=True,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
-def main(group: Optional[str], input: str, ref1: str, ref2: str):
+def main(group: Optional[str], clean: bool, input: str, ref1: str, ref2: str):
     sha_1: str
     sha_2: str
 
@@ -93,8 +99,20 @@ def main(group: Optional[str], input: str, ref1: str, ref2: str):
     width = 0.35  # the width of the bars
 
     fig, ax = plt.subplots()
-    rects1 = ax.barh(x - width / 2, ref1_times, width, label=f"{ref1} - {sha_1}")
-    rects2 = ax.barh(x + width / 2, ref2_times, width, label=f"{ref2} - {sha_2}")
+    rects1 = ax.barh(
+        x - width / 2,
+        ref1_times,
+        width,
+        label=f"{ref1} - {sha_1}",
+        color=("steelblue" if clean else "deepskyblue"),
+    )
+    rects2 = ax.barh(
+        x + width / 2,
+        ref2_times,
+        width,
+        label=f"{ref2} - {sha_2}",
+        color=("darkorange" if clean else "sandybrown"),
+    )
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_xlabel("seconds")
@@ -103,14 +121,30 @@ def main(group: Optional[str], input: str, ref1: str, ref2: str):
     ax.set_yticklabels(queries)
     ax.legend()
 
-    ax.bar_label(
-        rects1,
-        labels=[
-            # Only shows the percentage of difference if the it isn't small.
-            "" if -0.0001 < a - b < 0.0001 else f"{100 * (a - b):+.2f}%"
-            for a, b in zip(ref1_times, ref2_times)
-        ],
-    )
+    if not clean:
+        ax.bar_label(
+            rects1,
+            labels=[
+                # Only shows the percentage of difference if the it isn't small and is positive.
+                ""
+                if 0 <= a - b <= 0.0001 or a - b < 0
+                else f"{(a - b) / b * 100:+.2f}%"
+                for a, b in zip(ref1_times, ref2_times)
+            ],
+            color="red",
+        )
+
+        ax.bar_label(
+            rects1,
+            labels=[
+                # Only shows the percentage of difference if the it isn't small and is negative.
+                ""
+                if -0.0001 <= a - b <= 0 or a - b > 0
+                else f"{(a - b) / b * 100:+.2f}%"
+                for a, b in zip(ref1_times, ref2_times)
+            ],
+            color="green",
+        )
 
     fig.tight_layout()
 
