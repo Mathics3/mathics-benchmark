@@ -103,6 +103,15 @@ def main(group: Optional[str], input: str, ref1: str, ref2: str):
     ax.set_yticklabels(queries)
     ax.legend()
 
+    ax.bar_label(
+        rects1,
+        labels=[
+            # Only shows the percentage of difference if the it isn't small.
+            "" if -0.0001 < a - b < 0.0001 else f"{100 * (a - b):+.2f}%"
+            for a, b in zip(ref1_times, ref2_times)
+        ],
+    )
+
     fig.tight_layout()
 
     plt.savefig("report.png")
