@@ -23,21 +23,22 @@ import yaml
 from mathics.session import MathicsSession
 from mathics.core.parser import parse, MathicsSingleLineFeeder
 
-def dump_info(git_repo, timings: dict, verbose: int, output_path: Optional[str]) -> None:
+
+def dump_info(
+    git_repo, timings: dict, verbose: int, output_path: Optional[str]
+) -> None:
     """Write gathered data if `output_path` given. Otherwise if verbose > 0,
     just print out the gathered data.
 
     `timings`: a dictionary of timing information
     `git_repo`: the git repository for Mathics core.
     """
-    dump_info = {
-        "timings": timings,
-        "info": get_info(git_repo)
-    }
+    dump_info = {"timings": timings, "info": get_info(git_repo)}
     if verbose:
         if output_path:
             print(f"Dumping information to file {output_path}")
         from pprint import pprint
+
         pprint(dump_info)
     if not output_path:
         return
@@ -51,6 +52,7 @@ def get_srcdir() -> str:
     filename = osp.normcase(osp.dirname(osp.abspath(__file__)))
     return osp.realpath(filename)
 
+
 def get_info(repo) -> dict:
     info = {
         "git SHA": repo.head.commit.hexsha[:6],
@@ -61,6 +63,7 @@ def get_info(repo) -> dict:
         "System Memory": psutil.virtual_memory().total,
     }
     return info
+
 
 @click.command()
 @click.option(
@@ -79,7 +82,9 @@ def get_info(repo) -> dict:
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("head", nargs=1, type=click.Path(readable=True), required=False)
 def main(verbose: int, pull: bool, input: str, head: Optional[str]):
-    bench_data = yaml.load(open(f"benchmarks/{input}.yaml", "r"), Loader=yaml.FullLoader)
+    bench_data = yaml.load(
+        open(f"benchmarks/{input}.yaml", "r"), Loader=yaml.FullLoader
+    )
     repo = setup_git()
 
     repo.git.checkout("master")
@@ -97,12 +102,15 @@ def main(verbose: int, pull: bool, input: str, head: Optional[str]):
         repo.git.checkout(head)
 
         if verbose:
-            print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
+            print(
+                f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
+            )
 
         timings = run_benchmark(bench_data, verbose)
         dump_info(repo, timings, verbose, f"results/{input}_{head}.json")
 
         repo.git.checkout("master")
+
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
@@ -113,7 +121,7 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """
     session = MathicsSession(add_builtin=True, catch_interrupt=False)
 
-    default_iterations =  bench_data.get("iterations", 50)
+    default_iterations = bench_data.get("iterations", 50)
     timings = {}  # where we accumulate timings from the following loop..
     for category, value in bench_data["categories"].items():
         iterations = value.get("iterations", default_iterations)
@@ -132,8 +140,11 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
             print()
     return timings
 
+
 default_git_repo = str(Path(get_srcdir()).parent / Path("Mathics"))
-def setup_git(repo_path: str=default_git_repo):
+
+
+def setup_git(repo_path: str = default_git_repo):
     repo = Repo(repo_path)
     return repo
 
