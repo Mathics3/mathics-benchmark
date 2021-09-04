@@ -1,0 +1,20 @@
+# The goal here is to understand costs of some simple primitive builtins
+# there are two dimensions by which we want to understand this:
+# how a primitive grows as a function of the size of its parameter and
+# how a efficient a primitive is compared to other things of its class.
+
+# Default number of iterations
+iterations: 500
+
+categories:
+  MakeBoxes:
+    exprs:
+      - '\(x \^ 2\)'
+      - '\(x \_ 2\)'
+      - '\( a \& b \% c\)'
+      - '\( \@ 5 \)'
+      - '\(x \& y \)'
+      - '\(x \+ y \)'
+      - '\( x \^ 2 \_ 4 \)'
+      - '(a + b)[x]'
+      - '(a b)[x]'
