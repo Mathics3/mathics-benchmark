@@ -1,6 +1,6 @@
 /.python-version
 /Mathics_benchmark.egg-info
 /results/*.json
+/report.png
 __pycache__
 tmp
-report.png
