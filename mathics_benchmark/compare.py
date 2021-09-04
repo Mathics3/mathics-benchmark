@@ -57,14 +57,19 @@ def main(
     sha_1: str
     sha_2: str
 
-    queries = []
-    ref1_times = []
-    ref2_times = []
+    queries: list[float] = []
+    ref1_times: list[float] = []
+    ref2_times: list[float] = []
 
-    path = f"results/{input}_{ref1}.json"
+    path = (
+        f"results/{input}.json" if ref1 == "master" else f"results/{input}_{ref1}.json"
+    )
 
     if not osp.isfile(path):
-        arguments = [input, ref1]
+        arguments = [input]
+
+        if ref1 != "master":
+            arguments.append(ref1)
 
         if pull:
             arguments.append("-p")
