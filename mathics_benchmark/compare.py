@@ -43,6 +43,12 @@ from typing import Optional
     help="Update the Mathics repository",
     is_flag=True,
 )
+@click.option(
+    "-f",
+    "--force",
+    help="Run the benchmarks even if they already exist",
+    is_flag=True,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
@@ -50,6 +56,7 @@ def main(
     group: Optional[str],
     clean: bool,
     pull: bool,
+    force: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -65,7 +72,7 @@ def main(
         f"results/{input}.json" if ref1 == "master" else f"results/{input}_{ref1}.json"
     )
 
-    if not osp.isfile(path):
+    if not osp.isfile(path) or force:
         arguments = [input]
 
         if ref1 != "master":
@@ -105,7 +112,7 @@ def main(
         f"results/{input}.json" if ref2 == "master" else f"results/{input}_{ref2}.json"
     )
 
-    if not osp.isfile(path):
+    if not osp.isfile(path) or force:
         arguments = [input]
 
         if ref2 != "master":
