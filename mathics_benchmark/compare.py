@@ -18,10 +18,10 @@ import matplotlib.pyplot as plt
 import json
 import click
 import sys
-import bench
 
 import os.path as osp
 
+from mathics_benchmark import bench
 from typing import Optional
 
 

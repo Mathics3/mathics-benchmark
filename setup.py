@@ -9,6 +9,18 @@ setup(
     version="1.0.0",
     author="The Mathics Team",
     author_email="mathics-devel@googlegroups.com",
-    install_requires=["click", "psutil", "pygit"],
+    entry_points={
+        "console_scripts": [
+            "mathics-bench = mathics_benchmark.bench:main",
+            "mathics-bench-compare = mathics_benchmark.compare:main",
+        ]
+    },
+    install_requires=[
+        "click",
+        "psutil",
+        "GitPython",
+        "PyYAML",
+        'matplotlib>="3.4.0',
+    ],
     license="GPLv3",
 )
