@@ -42,7 +42,7 @@ my_dir = source_dir()
 # Stores __version__ in the current namespace. This can't be executed inside a function.
 exec(
     compile(
-        open(osp.join(my_dir, "Mathics", "mathics", "version.py")).read(),
+        open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
         osp.join(my_dir, "Mathics", "mathics", "version.py"),
         "exec",
     )
@@ -130,7 +130,9 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     for path in [
         config,
         osp.join(my_dir, "benchmarks", config),
+        osp.join(my_dir, "../", "benchmarks", config),
         osp.join(my_dir, "benchmarks", config + ".yaml"),
+        osp.join(my_dir, "../", "benchmarks", config + ".yaml"),
     ]:
         if osp.isfile(path):
             break
