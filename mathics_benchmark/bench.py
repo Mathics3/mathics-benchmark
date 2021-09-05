@@ -1,17 +1,19 @@
-"""Runs a particular benchmark.
+#!/usr/bin/env python3
 
-Examples:
-- Runs a benchmark in master:
-  python ./mathics_benchmark/bench.py bench-1565
-- Runs a benchmark in a specifc head:
-  python ./mathics_benchmark/bench.py bench-1565 quickpatterntest2
-- Runs a benchmark with verbose output:
-  python ./mathics_benchmark/bench.py -v bench-1565
-- Pull before running the benchmark:
-  python ./mathics_benchmark/bench.py -p bench-1565
 """
+Command-line program to run a benchmark suite from a YAML configuration file
+on Mathics-core at a given git reference.
 
-# Outside of this program: setup virtual environments to test Mathics on
+ Examples:
+ - Run benchmark in master:
+   python ./mathics_benchmark/bench.py bench-1565
+ - Runs a benchmark in a specifc head:
+   python ./mathics_benchmark/bench.py bench-1565 quickpatterntest2
+ - Runs a benchmark with verbose output:
+   python ./mathics_benchmark/bench.py -v bench-1565
+ - Pull before running the benchmark:
+   python ./mathics_benchmark/bench.py -p bench-1565
+"""
 
 from git import Repo
 from typing import Optional
@@ -31,6 +33,13 @@ from mathics.session import MathicsSession
 from mathics.core.parser import parse, MathicsSingleLineFeeder
 
 
+def source_dir():
+    return osp.dirname(__file__)
+
+
+my_dir = source_dir()
+
+
 def dump_info(
     git_repo, timings: dict, verbose: int, output_path: Optional[str]
 ) -> None:
@@ -44,9 +53,11 @@ def dump_info(
     if verbose:
         if output_path:
             print(f"Dumping information to file {output_path}")
-        from pprint import pprint
 
-        pprint(dump_info)
+        if verbose > 1:
+            from pprint import pprint
+
+            pprint(dump_info)
     if not output_path:
         return
     json.dump(dump_info, open(output_path, "w"))
@@ -86,12 +97,35 @@ def get_info(repo) -> dict:
     help="Update the Mathics repository",
     is_flag=True,
 )
-@click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
-@click.argument("head", nargs=1, type=click.Path(readable=True), required=False)
-def main(verbose: int, pull: bool, input: str, head: Optional[str]):
-    bench_data = yaml.load(
-        open(f"benchmarks/{input}.yaml", "r"), Loader=yaml.FullLoader
-    )
+@click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
+@click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
+def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
+    """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
+
+    CONFIG is either:
+
+    A file path (relative or absolute) like "benchmarks/String_vs_StringQ.yaml".
+
+    A short name under the "benchmarks" subdirectory of the installed
+    package.  Here we will add the "yaml" extension if needed. So
+    "String_vs_StringQ" refers to "benchmarks/String_vs_StringQ.yaml"
+    in the package directory.
+
+    REF is a git reference which can be a branch name, e.g. "master",
+    a tag name like "4.0.0", or a short or long SHA1 like "d929af3b"
+    or "d929af3b3ad1a5926942891ad98b17705d423bf2".
+
+    REF defaults to "master".
+    """
+
+    for path in [
+        config,
+        osp.join(my_dir, "benchmarks", config),
+        osp.join(my_dir, "benchmarks", config + ".yaml"),
+    ]:
+        if osp.isfile(path):
+            break
+    bench_data = yaml.load(open(path, "r"), Loader=yaml.FullLoader)
     repo = setup_git()
 
     repo.git.checkout("master")
@@ -103,10 +137,15 @@ def main(verbose: int, pull: bool, input: str, head: Optional[str]):
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
 
     timings = run_benchmark(bench_data, verbose)
-    dump_info(repo, timings, verbose, f"results/{input}.json")
 
-    if head:
-        repo.git.checkout(head)
+    results_dir = osp.join(my_dir, "..", "results")
+    short_name = osp.basename(config)
+    if short_name.endswith(".yaml"):
+        short_name = short_name[:len(".yaml")]
+    dump_info(repo, timings, verbose, osp.join(results_dir, short_name + ".json"))
+
+    if ref:
+        repo.git.checkout(ref)
 
         if verbose:
             print(
@@ -114,7 +153,7 @@ def main(verbose: int, pull: bool, input: str, head: Optional[str]):
             )
 
         timings = run_benchmark(bench_data, verbose)
-        dump_info(repo, timings, verbose, f"results/{input}_{head}.json")
+        dump_info(repo, timings, verbose, osp.join(results_dir, f"{short_name}_{ref}.json"))
 
         repo.git.checkout("master")
 
