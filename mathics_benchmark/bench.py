@@ -39,6 +39,15 @@ def source_dir():
 
 my_dir = source_dir()
 
+# Stores __version__ in the current namespace. This can't be executed inside a function.
+exec(
+    compile(
+        open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
+        osp.join(my_dir, "Mathics", "mathics", "version.py"),
+        "exec",
+    )
+)
+
 
 def dump_info(
     git_repo, timings: dict, verbose: int, output_path: Optional[str]
@@ -76,7 +85,7 @@ def get_info(repo) -> dict:
         "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
-        # "Mathics-version":  ???
+        "Mathics-version": __version__,
         "Processor": platform.machine(),
         "System Memory": psutil.virtual_memory().total,
     }
@@ -121,7 +130,9 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     for path in [
         config,
         osp.join(my_dir, "benchmarks", config),
+        osp.join(my_dir, "../", "benchmarks", config),
         osp.join(my_dir, "benchmarks", config + ".yaml"),
+        osp.join(my_dir, "../", "benchmarks", config + ".yaml"),
     ]:
         if osp.isfile(path):
             break
@@ -141,7 +152,7 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     results_dir = osp.join(my_dir, "..", "results")
     short_name = osp.basename(config)
     if short_name.endswith(".yaml"):
-        short_name = short_name[:len(".yaml")]
+        short_name = short_name[: len(".yaml")]
     dump_info(repo, timings, verbose, osp.join(results_dir, short_name + ".json"))
 
     if ref:
@@ -153,7 +164,9 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
             )
 
         timings = run_benchmark(bench_data, verbose)
-        dump_info(repo, timings, verbose, osp.join(results_dir, f"{short_name}_{ref}.json"))
+        dump_info(
+            repo, timings, verbose, osp.join(results_dir, f"{short_name}_{ref}.json")
+        )
 
         repo.git.checkout("master")
 
