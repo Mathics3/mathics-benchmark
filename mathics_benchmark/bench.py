@@ -39,6 +39,15 @@ def source_dir():
 
 my_dir = source_dir()
 
+# Stores __version__ in the current namespace. This can't be executed inside a function.
+exec(
+    compile(
+        open(osp.join(my_dir, "Mathics", "mathics", "version.py")).read(),
+        osp.join(my_dir, "Mathics", "mathics", "version.py"),
+        "exec",
+    )
+)
+
 
 def dump_info(
     git_repo, timings: dict, verbose: int, output_path: Optional[str]
@@ -76,7 +85,7 @@ def get_info(repo) -> dict:
         "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
-        # "Mathics-version":  ???
+        "Mathics-version": __version__,
         "Processor": platform.machine(),
         "System Memory": psutil.virtual_memory().total,
     }
