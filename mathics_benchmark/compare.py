@@ -18,11 +18,16 @@ import matplotlib.pyplot as plt
 import json
 import click
 import sys
+import re
 
 import os.path as osp
 
 from mathics_benchmark import bench
 from typing import Optional
+
+
+def break_string(string: str, number: int = 25) -> str:
+    return "\n".join(re.findall(".{1,%i}" % number, string))
 
 
 @click.command()
@@ -90,7 +95,7 @@ def main(
 
         if group:
             for query in object["timings"][group]:
-                queries.append(query)
+                queries.append(break_string(query))
 
                 # The time diveded by the number of interations.
                 ref1_times.append(
@@ -100,7 +105,7 @@ def main(
         else:
             for queries_group in object["timings"]:
                 for query in object["timings"][queries_group]:
-                    queries.append(query)
+                    queries.append(break_string(query))
 
                     # The time diveded by the number of interations.
                     ref1_times.append(
