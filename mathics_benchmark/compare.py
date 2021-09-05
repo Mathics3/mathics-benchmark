@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import json
 import click
 import sys
-import bench
+import mathics_benchmark.bench as bench
 
 import os.path as osp
 
