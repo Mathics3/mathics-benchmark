@@ -20,16 +20,17 @@ from typing import Optional
 
 from pathlib import Path
 import click
-import os
+import importlib
+import json
+import mathics.session
 import os.path as osp
 import platform
 import psutil
+import subprocess
 import sys
 import timeit
-import json
 import yaml
 
-from mathics.session import MathicsSession
 from mathics.core.parser import parse, MathicsSingleLineFeeder
 
 
@@ -38,16 +39,6 @@ def source_dir():
 
 
 my_dir = source_dir()
-
-# Stores __version__ in the current namespace. This can't be executed inside a function.
-exec(
-    compile(
-        open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
-        osp.join(my_dir, "Mathics", "mathics", "version.py"),
-        "exec",
-    )
-)
-
 
 def dump_info(
     git_repo, timings: dict, verbose: int, output_path: Optional[str]
@@ -81,11 +72,18 @@ def get_srcdir() -> str:
 
 
 def get_info(repo) -> dict:
+
+    locals = {"__version__": "??"}
+    exec(
+        open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
+        {}, locals,
+        )
+
     info = {
         "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
-        "Mathics-version": __version__,
+        "Mathics-version": locals["__version__"],  # noqa
         "Processor": platform.machine(),
         "System Memory": psutil.virtual_memory().total,
     }
@@ -147,6 +145,10 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
 
+    rc = setup_environment(verbose)
+    if rc != 0:
+        return rc
+
     timings = run_benchmark(bench_data, verbose)
 
     results_dir = osp.join(my_dir, "..", "results")
@@ -163,13 +165,31 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
                 f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
             )
 
+        rc = setup_environment(verbose)
+        if rc != 0:
+            return rc
+
         timings = run_benchmark(bench_data, verbose)
         dump_info(
             repo, timings, verbose, osp.join(results_dir, f"{short_name}_{ref}.json")
         )
 
         repo.git.checkout("master")
+    return 0
 
+def setup_environment(verbose: int) -> int:
+    """
+    Make sure Mathics core is set to the right place.
+    We will basically run "./setup.py develop".
+    """
+    command = [sys.executable, "./setup.py", "develop"]
+    completed_process = subprocess.run(command, capture_output=True)
+    rc = completed_process.returncode
+    if rc != 0:
+        print(f"""Running '{" ".join(command)}' gave nonzero return code. Output was:""")
+    elif verbose > 1:
+        print(completed_process.stdout.decode("utf-8"))
+    return rc
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
@@ -178,7 +198,8 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
 
     If `verbose` is set, show what's going on as it happens.
     """
-    session = MathicsSession(add_builtin=True, catch_interrupt=False)
+    importlib.reload(mathics.session)
+    session = mathics.session.MathicsSession(add_builtin=True, catch_interrupt=False)
 
     default_iterations = bench_data.get("iterations", 50)
     timings = {}  # where we accumulate timings from the following loop..
@@ -209,4 +230,4 @@ def setup_git(repo_path: str = default_git_repo):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
