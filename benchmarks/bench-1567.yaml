@@ -1,0 +1,16 @@
+# Testing https://github.com/mathics/Mathics/pull/1565
+# Pattern matching improvements for
+
+# Default number of iterations
+iterations: 500
+
+categories:
+  NextPrime:
+    iterations: 500
+    exprs:
+      - NextPrime[1,1]
+
+  ElementData:
+    iterations: 500
+    exprs:
+      - ElementData["Gold", "AtomicNumber"]
