@@ -1,0 +1,13 @@
+# Benchmark Re
+
+# The default number of iterations used in tests below
+iterations: 500
+
+categories:
+  Re:
+    exprs:
+      # The below should be in the same order as Im
+      - Re[I + Pi]
+      - Re[I]
+      - Re[Pi]
+      - Re[1]

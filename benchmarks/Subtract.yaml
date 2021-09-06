@@ -1,0 +1,12 @@
+iterations: 500
+
+categories:
+  Subtract:
+    comment: The queries below are the same as Plus, but with Subtract instead.
+    exprs:
+      - '1 - 2'
+      - '1 - 2 - 3'
+      - '1 - 2 - b'
+      - 'a - b - 3'
+      - '1234567890 - 2345678901'
+      - 'a - b - 4.5 - a'
