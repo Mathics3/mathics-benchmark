@@ -83,7 +83,7 @@ def get_info(repo) -> dict:
         "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Platform": sys.platform,
-        "Mathics-version": locals["__version__"],  # noqa
+        "Mathics-version": locals["__version__"],
         "Processor": platform.machine(),
         "System Memory": psutil.virtual_memory().total,
     }
@@ -183,7 +183,8 @@ def setup_environment(verbose: int) -> int:
     We will basically run "./setup.py develop".
     """
     command = [sys.executable, "./setup.py", "develop"]
-    completed_process = subprocess.run(command, capture_output=True)
+    mathics_dir = osp.join(my_dir, "../", "Mathics")
+    completed_process = subprocess.run(command, capture_output=True, cwd=mathics_dir)
     rc = completed_process.returncode
     if rc != 0:
         print(f"""Running '{" ".join(command)}' gave nonzero return code. Output was:""")
