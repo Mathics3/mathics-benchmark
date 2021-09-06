@@ -88,6 +88,10 @@ def get_bench_data(config: str) -> dict:
     if "includes" in bench_data:
         include_file: str
 
+        if "categories" not in bench_data:
+            # This allows files without categories, only includes.
+            bench_data["categories"] = {}
+
         for include_file in bench_data["includes"]:
             # The line bellow is recursive.
             include_file_bench_data = get_bench_data(include_file)
