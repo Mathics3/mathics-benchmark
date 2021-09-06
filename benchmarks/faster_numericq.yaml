@@ -1,0 +1,31 @@
+# Benchmark the time difference between NumericQ and NumberQ
+
+# The default number of iterations used in tests below
+iterations: 500
+
+categories:
+  N:
+    exprs:
+      - 'N[Pi, 50]'
+      - 'N[1/7]'
+      - 'N[1/7, 5]'
+      - 'N[a] = 10.9'
+      - 'N[a + b]'
+      - 'N[a, 20]'
+      - 'N[a, 20] = 11'
+      - 'N[f[a, b]]'
+      - 'N[c, p_?(#>10&)] := p'
+      - 'N[c, 3]'
+      - 'N[c, 11]'
+      - 'N[d] ^= 5;'
+      - 'NValues[d]'
+      - 'N[e] = 6;'
+      - 'N[e]'
+      - 'N[e[f]] = 7;'
+      - 'N[g[x_, y_], p_] := x + y * Pi /; x + y > 3'
+      - 'N[g[1, 1]]'
+      - 'N[g[2, 2]] // InputForm'
+      - 'N[Exp[0.1], 50]'
+      - 'N[Exp[1.0`20], 50]'
+      - 'N[1.012345678901234567890123, 20]'
+      - 'N[I, 30]'
