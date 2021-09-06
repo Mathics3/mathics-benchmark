@@ -1,0 +1,11 @@
+# Benchmark ContinuedFraction
+
+# The default number of iterations used in tests below
+iterations: 500
+
+categories:
+  ContinuedFraction:
+    exprs:
+      - ContinuedFraction[Pi, 10]
+      - ContinuedFraction[(1 + 2 Sqrt[3])/5]
+      - ContinuedFraction[Sqrt[70]]
