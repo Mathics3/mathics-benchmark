@@ -40,6 +40,7 @@ def source_dir():
 
 my_dir = source_dir()
 
+
 def dump_info(
     git_repo, timings: dict, verbose: int, output_path: Optional[str]
 ) -> None:
@@ -76,8 +77,9 @@ def get_info(repo) -> dict:
     locals = {"__version__": "??"}
     exec(
         open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
-        {}, locals,
-        )
+        {},
+        locals,
+    )
 
     info = {
         "git SHA": repo.head.commit.hexsha[:6],
@@ -177,6 +179,7 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
         repo.git.checkout("master")
     return 0
 
+
 def setup_environment(verbose: int) -> int:
     """
     Make sure Mathics core is set to the right place.
@@ -187,10 +190,13 @@ def setup_environment(verbose: int) -> int:
     completed_process = subprocess.run(command, capture_output=True, cwd=mathics_dir)
     rc = completed_process.returncode
     if rc != 0:
-        print(f"""Running '{" ".join(command)}' gave nonzero return code. Output was:""")
+        print(
+            f"""Running '{" ".join(command)}' gave nonzero return code. Output was:"""
+        )
     elif verbose > 1:
         print(completed_process.stdout.decode("utf-8"))
     return rc
+
 
 def run_benchmark(bench_data: dict, verbose: int) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
