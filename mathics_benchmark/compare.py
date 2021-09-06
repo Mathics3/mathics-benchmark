@@ -176,12 +176,14 @@ def main(
     ax.legend()
 
     if not clean:
+        # The percentage dirrence between a and b is: (a - b) / b * 100
+
         ax.bar_label(
             rects1,
             labels=[
-                # Only shows the percentage of difference if the it isn't small and is positive.
+                # Only shows the percentage of difference if the it is greater than 1% and is positive.
                 ""
-                if 0 <= a - b <= 0.0001 or a - b < 0
+                if 0 <= (a - b) / b <= 0.01 or a - b < 0
                 else f"{(a - b) / b * 100:+.2f}%"
                 for a, b in zip(ref1_times, ref2_times)
             ],
@@ -191,9 +193,9 @@ def main(
         ax.bar_label(
             rects1,
             labels=[
-                # Only shows the percentage of difference if the it isn't small and is negative.
+                # Only shows the percentage of difference if the it is greater than 1% and is negative.
                 ""
-                if -0.0001 <= a - b <= 0 or a - b > 0
+                if -0.01 <= (a - b) / b <= 0 or a - b > 0
                 else f"{(a - b) / b * 100:+.2f}%"
                 for a, b in zip(ref1_times, ref2_times)
             ],
