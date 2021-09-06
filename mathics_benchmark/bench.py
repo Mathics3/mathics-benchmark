@@ -72,6 +72,38 @@ def get_srcdir() -> str:
     return osp.realpath(filename)
 
 
+def get_bench_data(config: str) -> dict:
+    for path in [
+        config,
+        osp.join(my_dir, "benchmarks", config),
+        osp.join(my_dir, "../", "benchmarks", config),
+        osp.join(my_dir, "benchmarks", config + ".yaml"),
+        osp.join(my_dir, "../", "benchmarks", config + ".yaml"),
+    ]:
+        if osp.isfile(path):
+            break
+
+    bench_data = yaml.load(open(path, "r"), Loader=yaml.FullLoader)
+
+    if "includes" in bench_data:
+        include_file: str
+
+        for include_file in bench_data["includes"]:
+            # The line bellow is recursive.
+            include_file_bench_data = get_bench_data(include_file)
+
+            # If that file has a default iteration number we add that number to every category which don't have an iteration number.
+            # If we don't do that, the main file iteration number will override the included file iteration number.
+            if "interations" in include_file_bench_data:
+                for category in include_file_bench_data["categories"]:
+                    if "iterations" not in category:
+                        category["iterations"] = include_file_bench_data["iterations"]
+
+            bench_data["categories"].update(include_file_bench_data["categories"])
+
+    return bench_data
+
+
 def get_info(repo) -> dict:
 
     locals = {"__version__": "??"}
@@ -127,16 +159,7 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     REF defaults to "master".
     """
 
-    for path in [
-        config,
-        osp.join(my_dir, "benchmarks", config),
-        osp.join(my_dir, "../", "benchmarks", config),
-        osp.join(my_dir, "benchmarks", config + ".yaml"),
-        osp.join(my_dir, "../", "benchmarks", config + ".yaml"),
-    ]:
-        if osp.isfile(path):
-            break
-    bench_data = yaml.load(open(path, "r"), Loader=yaml.FullLoader)
+    bench_data = get_bench_data(config)
     repo = setup_git()
 
     repo.git.checkout("master")
