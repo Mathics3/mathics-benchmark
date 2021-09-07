@@ -133,7 +133,7 @@ def worker(
     sha_1: str
     sha_2: str
 
-    queries: list[float] = []
+    queries: list[str] = []
     ref1_times: list[float] = []
     ref2_times: list[float] = []
 
