@@ -26,7 +26,7 @@ from mathics_benchmark import bench
 from typing import Optional
 
 
-def break_string(string: str, number: int = 25) -> str:
+def break_string(string: str, number: int) -> str:
     return "\n".join(re.findall(".{1,%i}" % number, string))
 
 
@@ -95,7 +95,7 @@ def main(
 
         if group:
             for query in object["timings"][group]:
-                queries.append(break_string(query))
+                queries.append(break_string(query, 25 if len(queries) <= 10 else 35))
 
                 # The time diveded by the number of interations.
                 ref1_times.append(
@@ -105,7 +105,9 @@ def main(
         else:
             for queries_group in object["timings"]:
                 for query in object["timings"][queries_group]:
-                    queries.append(break_string(query))
+                    queries.append(
+                        break_string(query, 25 if len(queries) <= 10 else 35)
+                    )
 
                     # The time diveded by the number of interations.
                     ref1_times.append(
