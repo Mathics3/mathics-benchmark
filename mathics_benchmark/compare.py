@@ -19,6 +19,7 @@ import json
 import click
 import sys
 import re
+import os
 
 import os.path as osp
 
@@ -60,6 +61,12 @@ def break_string(string: str, number: int) -> str:
     help="Show the benchmarks only for ref1",
     is_flag=True,
 )
+@click.option(
+    "-l",
+    "--logarithmic",
+    help="Use logarithmic scale for times",
+    is_flag=True,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
@@ -69,6 +76,7 @@ def main(
     pull: bool,
     force: bool,
     single: bool,
+    logarithmic: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -80,6 +88,8 @@ def main(
     ref1_times: list[float] = []
     ref2_times: list[float] = []
 
+    if input[-5:] == ".yaml":
+        input = input[:-5]
     path = (
         f"results/{input}.json" if ref1 == "master" else f"results/{input}_{ref1}.json"
     )
@@ -165,6 +175,9 @@ def main(
     width = 0.35  # the width of the bars
 
     fig, ax = plt.subplots()
+    if logarithmic:
+        ax.set_xscale("log")
+
     rects1 = ax.barh(
         x - width / 2,
         ref1_times,
@@ -189,7 +202,7 @@ def main(
     ax.set_yticklabels(
         queries,
         fontdict={
-            "fontsize": "large" if len(queries) <= 10 else 6,
+            "fontsize": "large" if len(queries) <= 5 else 6,
         },
     )
     ax.legend()
@@ -225,8 +238,13 @@ def main(
             )
 
     fig.tight_layout()
-
-    plt.savefig("report.png")
+    folder = f"{ref1}_vs_{ref2}" if ref2 != "master" else ref1
+    try:
+        os.mkdir(f"reports/{folder}")
+    except:
+        pass
+    filename = f"reports/{folder}/report-{input}.png"
+    plt.savefig(filename)
 
 
 if __name__ == "__main__":
