@@ -1,3 +1,5 @@
+compare-groups: true
+
 includes:
   - Plus
   - Subtract
