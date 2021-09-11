@@ -1,4 +1,4 @@
-# Benchmark the time difference between NumericQ and NumberQ
+# Benchmark N
 
 # The default number of iterations used in tests below
 iterations: 500
