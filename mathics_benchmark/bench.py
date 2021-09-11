@@ -2,7 +2,7 @@
 
 """
 Command-line program to run a benchmark suite from a YAML configuration file
-on Mathics-core at a given git reference.
+on mathics-core at a given git reference.
 
  Examples:
  - Run benchmark in master:
@@ -112,7 +112,7 @@ def get_info(repo) -> dict:
 
     locals = {"__version__": "??"}
     exec(
-        open(osp.join(my_dir, "../", "Mathics", "mathics", "version.py")).read(),
+        open(osp.join(my_dir, "../", "mathics-core", "mathics", "version.py")).read(),
         {},
         locals,
     )
@@ -213,7 +213,7 @@ def setup_environment(verbose: int) -> int:
     We will basically run "./setup.py develop".
     """
     command = [sys.executable, "./setup.py", "develop"]
-    mathics_dir = osp.join(my_dir, "../", "Mathics")
+    mathics_dir = osp.join(my_dir, "../", "mathics-core")
     completed_process = subprocess.run(command, capture_output=True, cwd=mathics_dir)
     rc = completed_process.returncode
     if rc != 0:
@@ -255,7 +255,7 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
     return timings
 
 
-default_git_repo = str(Path(get_srcdir()).parent / Path("Mathics"))
+default_git_repo = str(Path(get_srcdir()).parent / Path("mathics-core"))
 
 
 def setup_git(repo_path: str = default_git_repo):

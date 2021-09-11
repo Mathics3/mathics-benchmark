@@ -46,7 +46,7 @@ def break_string(string: str, number: int) -> str:
 @click.option(
     "-p",
     "--pull",
-    help="Update the Mathics repository",
+    help="Update the mathics-core repository",
     is_flag=True,
 )
 @click.option(
