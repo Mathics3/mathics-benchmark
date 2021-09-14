@@ -1,4 +1,5 @@
 /.python-version
+/dist
 /Mathics_benchmark.egg-info
 /report.png
 /results/*.json
