@@ -1,6 +1,7 @@
 /.python-version
+/dist
 /Mathics_benchmark.egg-info
-/report.png
+/reports/*
 /results/*.json
 /venv
 __pycache__
