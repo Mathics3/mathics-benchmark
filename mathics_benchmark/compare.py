@@ -78,7 +78,7 @@ def break_string(string: str, number: int) -> str:
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
 def main(
-        verbose: int,
+    verbose: int,
     group: Optional[str],
     clean: bool,
     pull: bool,
@@ -90,18 +90,31 @@ def main(
     ref2: str,
 ):
     if input == "run-all":
-        import glob 
+        import glob
+
         inputs = glob.glob("benchmarks/*.yaml")
         for input in inputs:
             print(f"running {input[11:]}")
-            worker(verbose, group, clean, pull, force, single, logarithmic, input[11:], ref1, ref2)    
+            worker(
+                verbose,
+                group,
+                clean,
+                pull,
+                force,
+                single,
+                logarithmic,
+                input[11:],
+                ref1,
+                ref2,
+            )
     else:
-        worker(verbose, group, clean, pull, force, single, logarithmic, input, ref1, ref2)    
-        
+        worker(
+            verbose, group, clean, pull, force, single, logarithmic, input, ref1, ref2
+        )
 
 
 def worker(
-        verbose: int,
+    verbose: int,
     group: Optional[str],
     clean: bool,
     pull: bool,
@@ -121,14 +134,13 @@ def worker(
 
     if input[-5:] == ".yaml":
         input = input[:-5]
-    path = (f"results/{ref1}/{input}.json")
+    path = f"results/{ref1}/{input}.json"
     folder = f"{ref1}"
     try:
         os.mkdir(f"results/{ref1}")
     except:
         pass
 
-    
     if not osp.isfile(path) or force:
         arguments = [input]
 
@@ -137,7 +149,7 @@ def worker(
 
         if pull:
             arguments.append("-p")
-            
+
         if verbose:
             arguments.append("-v")
 
