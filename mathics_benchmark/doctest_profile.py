@@ -3,6 +3,10 @@ import trace
 import cProfile
 import pickle
 
+import pstats
+from pstats import SortKey
+
+
 import mathics.docpipeline as docpipeline
 
 
@@ -43,11 +47,15 @@ def normalize_col(s):
         s = row[0] + "\t" + row[1] + "\t" + " ".join(row[2:])
     return s.split("\t")
 
+if False:
+    cProfile.run(
+        compile("docpipeline.main()", "fake", "exec", optimize=2), filename=profile_file
+    )
 
-cProfile.run(
-    compile("docpipeline.main()", "fake", "exec", optimize=2), filename=profile_file
-)
+p = pstats.Stats(profile_file)
+p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats()
 
+sys.exit()
 
 with open(profile_file, "r") as f:
     s = f.readline()
