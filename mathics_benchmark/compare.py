@@ -3,6 +3,8 @@
 Examples:
 - Compare a head against master:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest
+
+  Note: "master" can't be the first argument of mathics-bench-compare.
 - Compare two heads:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest improve-rational-performance
 - Compare specific group:
@@ -11,6 +13,9 @@ Examples:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -c
 - Pull before running the benchmark:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -p
+
+- Run all benchmarks:
+  python ./mathics_benchmark/compare.py run-all b2e237c0aafd6fad08defc029332b5e328857a81
 """
 
 import numpy as np
