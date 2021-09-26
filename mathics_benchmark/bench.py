@@ -200,10 +200,11 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
 
         timings = run_benchmark(bench_data, verbose)
         dump_info(
-            repo, timings, verbose, osp.join(results_dir, f"{short_name}_{ref}.json")
+            repo, timings, verbose, osp.join(results_dir, f"{ref}/{short_name}.json")
         )
 
-        repo.git.checkout("master")
+        # I do not want to recompile when I run many benchmarks for the same branch
+        # repo.git.checkout("master")
     return 0
 
 
