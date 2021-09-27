@@ -1,3 +1,4 @@
 [submodule "mathics-core"]
 	path = mathics-core
 	url = https://github.com/Mathics3/mathics-core
+	branch = master
