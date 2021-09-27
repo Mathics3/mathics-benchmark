@@ -24,5 +24,5 @@ $PYTHON -m venv venv
 . venv/bin/activate
 PIP=${PIP:-pip}
 ${PIP} install -e .
-cd Mathics
+cd mathics-core
 $PYTHON ./setup.py develop
