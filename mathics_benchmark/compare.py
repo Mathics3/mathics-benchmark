@@ -10,17 +10,22 @@ The example above will be called the "base example" in the examples below.
 - Compare the "calculator-fns" benchmark in quickpatterntest in master in verbose mode:
   python ./mathics_benchmark/compare.py -v calculator-fns quickpatterntest
 
-- Compare the calculator-fns benchmark in quickpatterntest versus the improve-rational-performance git reference
+- Compare the calculator-fns benchmark in quickpatterntest versus the improve-rational-performance git reference:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest improve-rational-performance
 
 - Run the base example above, but only compare the group Power:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -g Power
 
-- Run the base example above without showing the percentage difference
+- Run the base example above without showing the percentage difference:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -c
 
-- Git pull before running the base benchmark example
+The 3 options bellow are only useful when the benchmarks' results doesn't exist or you are using --force
+- Run the benchmarks with verbose output:
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -v
+- Git pull before running the example benchmark:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -p
+- Override the number of iterations:
+  python ./mathics_benchmark/compare.py calculator-fns quickpatterntest -i 10
 
 - Run all benchmarks against the SHA1 indicated in verbose mode:
   python ./mathics_benchmark/compare.py -v run-all b2e237c0aafd6fad08defc029332b5e328857a81
@@ -89,6 +94,11 @@ def break_string(string: str, number: int) -> str:
     help="Use logarithmic scale for times",
     is_flag=True,
 )
+@click.option(
+    "-i",
+    "--iterations",
+    help="Override the number of iterations",
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
@@ -103,6 +113,7 @@ def main(
     input: str,
     ref1: str,
     ref2: str,
+    iterations: Optional[int],
 ):
     if input == "run-all":
         import glob
@@ -121,10 +132,21 @@ def main(
                 input[11:],
                 ref1,
                 ref2,
+                iterations,
             )
     else:
         worker(
-            verbose, group, clean, pull, force, single, logarithmic, input, ref1, ref2
+            verbose,
+            group,
+            clean,
+            pull,
+            force,
+            single,
+            logarithmic,
+            input,
+            ref1,
+            ref2,
+            iterations,
         )
 
 
@@ -139,6 +161,7 @@ def worker(
     input: str,
     ref1: str,
     ref2: str,
+    iterations: Optional[int],
 ):
     # The percentage diference between a and b is: (a - b) / b * 100
 
@@ -182,6 +205,10 @@ def worker(
 
         if verbose:
             arguments.append("-v")
+
+        if iterations:
+            arguments.append("-i")
+            arguments.append(iterations)
 
         try:
             bench.main(arguments)
@@ -239,6 +266,10 @@ def worker(
 
             if pull:
                 arguments.append("-p")
+
+            if iterations:
+                arguments.append("-i")
+                arguments.append(iterations)
 
             bench.main(arguments)
 
