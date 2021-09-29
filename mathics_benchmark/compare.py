@@ -153,7 +153,7 @@ def worker(
         input = input[:-5]
 
     path = (
-        f"results/{input}.json" if ref1 == "master" else f"results/{input}_{ref1}.json"
+        f"results/{input}.json" if ref1 == "master" else f"results/{ref1}/{input}.json"
     )
     try:
         if ref1 != "master":
@@ -218,7 +218,7 @@ def worker(
         path = (
             f"results/{input}.json"
             if ref2 == "master"
-            else f"results/{input}_{ref2}.json"
+            else f"results/{ref2}/{input}.json"
         )
 
         if not osp.isfile(path) or force:
