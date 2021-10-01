@@ -193,11 +193,15 @@ def main(
 
     bench_data = get_bench_data(config)
     repo = setup_git()
-
-    repo.git.checkout("master")
+    results_dir = osp.join(my_dir, "..", "results")
+    short_name = osp.basename(config)
+    if short_name.endswith(".yaml"):
+        short_name = short_name[: len(".yaml")]
 
     if pull:
         repo.remotes.origin.pull()
+
+    repo.git.checkout(ref)
 
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
@@ -206,39 +210,19 @@ def main(
     if rc != 0:
         return rc
 
-    timings = run_benchmark(bench_data, verbose, iterations)
-
-    results_dir = osp.join(my_dir, "..", "results")
-    short_name = osp.basename(config)
-    if short_name.endswith(".yaml"):
-        short_name = short_name[: len(".yaml")]
+    timings = run_benchmark(bench_data, verbose)
     dump_info(
-        repo, cython, timings, verbose, osp.join(results_dir, short_name + ".json")
+        repo,
+        timings,
+        verbose,
+        osp.join(
+            results_dir,
+            f"{ref}/{short_name}.json" if ref != "master" else f"{short_name}.json",
+        ),
     )
 
-    if ref:
-        repo.git.checkout(ref)
+    repo.git.checkout("master")
 
-        if verbose:
-            print(
-                f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
-            )
-
-        rc = setup_environment(verbose, cython)
-        if rc != 0:
-            return rc
-
-        timings = run_benchmark(bench_data, verbose, iterations)
-        dump_info(
-            repo,
-            cython,
-            timings,
-            verbose,
-            osp.join(results_dir, f"{ref}/{short_name}.json"),
-        )
-
-        # I do not want to recompile when I run many benchmarks for the same branch
-        # repo.git.checkout("master")
     return 0
 
 
