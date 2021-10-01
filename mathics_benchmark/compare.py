@@ -1,4 +1,5 @@
-"""Generate a bar plot for a particular benchmark.
+"""
+Generate a bar plot for a particular benchmark.
 
 Examples:
 - Compare the "calculator-fns" benchmark in git ref "quickpatterntest" to the master git branch:
