@@ -12,7 +12,7 @@ all: update install
 #: update mathics-core
 update:
 	git submodule init
-	git submodule update --recursive
+	git submodule update --remote
 
 #: install mathics-benchmark
 install:
