@@ -142,9 +142,20 @@ def get_info(repo) -> dict:
     help="Update the Mathics repository",
     is_flag=True,
 )
+@click.option(
+    "--cython/--no-cython",
+    help="Run Cython on setup. The default is don't run it.",
+    default=False,
+)
 @click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
-def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
+def main(
+    verbose: int,
+    pull: bool,
+    cython: bool,
+    config: str,
+    ref: Optional[str],
+):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
 
     CONFIG is either:
@@ -174,7 +185,7 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
 
-    rc = setup_environment(verbose)
+    rc = setup_environment(verbose, cython)
     if rc != 0:
         return rc
 
@@ -194,7 +205,7 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
                 f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
             )
 
-        rc = setup_environment(verbose)
+        rc = setup_environment(verbose, cython)
         if rc != 0:
             return rc
 
@@ -208,20 +219,30 @@ def main(verbose: int, pull: bool, config: str, ref: Optional[str]):
     return 0
 
 
-def setup_environment(verbose: int) -> int:
+def setup_environment(verbose: int, cython: bool) -> int:
     """
     Make sure Mathics core is set to the right place.
     We will basically run "./setup.py develop".
     """
-    command = [sys.executable, "./setup.py", "develop"]
+    command: list[str] = [sys.executable, "./setup.py", "develop"]
     mathics_dir = osp.join(my_dir, "../", "mathics-core")
-    completed_process = subprocess.run(command, capture_output=True, cwd=mathics_dir)
-    rc = completed_process.returncode
+
+    env: dict = {}
+    if not cython:
+        subprocess.run(["make", "clean-cython"], cwd=mathics_dir])
+
+        # If NO_CYTHON is set, Cython isn't used
+        # Otherwise, it is used
+        env["NO_CYTHON"] = "1"
+
+    completed_process = subprocess.run(
+        command, capture_output=True, cwd=mathics_dir, env=env
+    )
+    rc: int = completed_process.returncode
     if rc != 0:
-        print(
-            f"""Running '{" ".join(command)}' gave nonzero return code. Output was:"""
-        )
-    elif verbose > 1:
+        print(f"""Running '{" ".join(command)}' gave {rc} return code.""")
+    if verbose > 1:
+        print("Output was:")
         print(completed_process.stdout.decode("utf-8"))
     return rc
 

@@ -89,6 +89,11 @@ def break_string(string: str, number: int) -> str:
     help="Use logarithmic scale for times",
     is_flag=True,
 )
+@click.option(
+    "--cython/--no-cython",
+    help="Run Cython on setup. The default is don't run it.",
+    default=False,
+)
 @click.argument("input", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref1", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref2", nargs=1, type=click.Path(readable=True), default="master")
@@ -100,6 +105,7 @@ def main(
     force: bool,
     single: bool,
     logarithmic: bool,
+    cython: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -118,13 +124,24 @@ def main(
                 force,
                 single,
                 logarithmic,
+                cython,
                 input[11:],
                 ref1,
                 ref2,
             )
     else:
         worker(
-            verbose, group, clean, pull, force, single, logarithmic, input, ref1, ref2
+            verbose,
+            group,
+            clean,
+            pull,
+            force,
+            single,
+            logarithmic,
+            cython,
+            input,
+            ref1,
+            ref2,
         )
 
 
@@ -136,6 +153,7 @@ def worker(
     force: bool,
     single: bool,
     logarithmic: bool,
+    cython: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -182,6 +200,9 @@ def worker(
 
         if verbose:
             arguments.append("-v")
+
+        if cython:
+            arguments.append("--cython")
 
         try:
             bench.main(arguments)
