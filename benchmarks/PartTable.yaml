@@ -1,0 +1,12 @@
+# Benchmark N
+
+# The default number of iterations used in tests below
+iterations: 100
+
+categories:
+  # We think that speeding up Part [[ ... ]] is crucial speeking up overall
+  # performance
+  Part using Table:
+    exprs:
+      - "F = Table[i*j*k, {i, 1, 2}, {j, 1, 2}, {k, 1, 1}]; F[[;; All, 2 ;; 3, 2]] = t;"
+      - "F[[;; All, 1 ;; 2, 3 ;; 3]] = k;"
