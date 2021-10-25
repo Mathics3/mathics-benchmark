@@ -1,13 +1,13 @@
 """Generate a bar plot for a particular benchmark.
 
 Examples:
-- Compare the calculator-fns benchmark in quickpatterntest in master:
+- Compare the "calculator-fns" benchmark in git ref "quickpatterntest" to the master git branch:
   python ./mathics_benchmark/compare.py calculator-fns quickpatterntest
 
-  Note: "master" can't be a git reference argument of mathics-bench-compare when only one is given.
-  Below this will be called the "base example"
+"calculator-fns" is a YAML file in the be "benchmarks" directory.
+The example above will be called the "base example" in the examples below.
 
-- Compare the calculator-fns benchmark in quickpatterntest in master in verbose mode:
+- Compare the "calculator-fns" benchmark in quickpatterntest in master in verbose mode:
   python ./mathics_benchmark/compare.py -v calculator-fns quickpatterntest
 
 - Compare the calculator-fns benchmark in quickpatterntest versus the improve-rational-performance git reference
