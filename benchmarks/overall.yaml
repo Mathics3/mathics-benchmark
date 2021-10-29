@@ -1,0 +1,22 @@
+# This tries to measure the overall performance of Mathics
+
+iterations: 10
+
+categories:
+  Matrices:
+    exprs:
+      - Transpose @ Partition[Flatten @ Transpose @ Abs @ RandomReal[{-1, 1}, {50, 50}], 40]
+      - Eigenvalues @ RandomReal[{0, 1}, {10, 10}]
+  Sorting:
+    exprs:
+      - Sort @ RandomReal[{0, 1}, {200}]
+  Integer computations:
+    exprs:
+      - 9009!
+      - v := {}
+      - Do[If[PrimeQ[j^2 - 1], AppendTo[v, j^2 - 1]], {j, 1000}]
+      - Clear[v]
+      - Plus @@ Flatten @ Table[Table[x + y - RandomReal[{0, N[Pi E^2]}], {y, 10}], {x, 10}]
+  Analysis:
+    exprs:
+      - NIntegrate[Sin[x^2], {x, -1, 1}]
