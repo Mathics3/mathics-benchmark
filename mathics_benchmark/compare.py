@@ -95,6 +95,11 @@ def break_string(string: str, number: int) -> str:
     is_flag=True,
 )
 @click.option(
+    "--cython/--no-cython",
+    help="Run Cython on setup. The default is don't run it.",
+    default=False,
+)
+@click.option(
     "-i",
     "--iterations",
     help="Override the number of iterations",
@@ -110,6 +115,7 @@ def main(
     force: bool,
     single: bool,
     logarithmic: bool,
+    cython: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -129,6 +135,7 @@ def main(
                 force,
                 single,
                 logarithmic,
+                cython,
                 input[11:],
                 ref1,
                 ref2,
@@ -143,6 +150,7 @@ def main(
             force,
             single,
             logarithmic,
+            cython,
             input,
             ref1,
             ref2,
@@ -158,6 +166,7 @@ def worker(
     force: bool,
     single: bool,
     logarithmic: bool,
+    cython: bool,
     input: str,
     ref1: str,
     ref2: str,
@@ -206,6 +215,8 @@ def worker(
         if verbose:
             arguments.append("-v")
 
+        if cython:
+            arguments.append("--cython")
         if iterations:
             arguments.append("-i")
             arguments.append(iterations)
@@ -218,7 +229,7 @@ def worker(
     with open(path) as file:
         object = json.load(file)
 
-        sha_1 = object["info"]["git SHA"]
+        sha_1 = object["info"]["Git SHA"]
 
         if group:
             for query in object["timings"][group]:
@@ -276,7 +287,7 @@ def worker(
         with open(path) as file:
             object = json.load(file)
 
-            sha_2 = object["info"]["git SHA"]
+            sha_2 = object["info"]["Git SHA"]
 
             if group:
                 for query in object["timings"][group]:

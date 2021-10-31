@@ -44,7 +44,11 @@ my_dir = source_dir()
 
 
 def dump_info(
-    git_repo, timings: dict, verbose: int, output_path: Optional[str]
+    git_repo,
+    cython: bool,
+    timings: dict,
+    verbose: int,
+    output_path: Optional[str],
 ) -> None:
     """Write gathered data if `output_path` given. Otherwise if verbose > 0,
     just print out the gathered data.
@@ -52,7 +56,7 @@ def dump_info(
     `timings`: a dictionary of timing information
     `git_repo`: the git repository for Mathics core.
     """
-    dump_info = {"timings": timings, "info": get_info(git_repo)}
+    dump_info = {"timings": timings, "info": get_info(git_repo, cython)}
     if verbose:
         if output_path:
             print(f"Dumping information to file {output_path}")
@@ -110,7 +114,7 @@ def get_bench_data(config: str) -> dict:
     return bench_data
 
 
-def get_info(repo) -> dict:
+def get_info(repo, cython: bool) -> dict:
 
     locals = {"__version__": "??"}
     exec(
@@ -119,12 +123,17 @@ def get_info(repo) -> dict:
         locals,
     )
 
+    python_implemetation: str = platform.python_implementation()
+    python_version: str = ".".join(str(number) for number in sys.version_info[:3])
+
     info = {
-        "git SHA": repo.head.commit.hexsha[:6],
+        "Has Cython": "Yes" if cython else "No",
+        "Git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
-        "Platform": sys.platform,
         "Mathics-version": locals["__version__"],
+        "Platform": sys.platform,
         "Processor": platform.machine(),
+        "Python version": f"{python_implementation} {python_version}",
         "System Memory": psutil.virtual_memory().total,
     }
     return info
@@ -145,6 +154,11 @@ def get_info(repo) -> dict:
     is_flag=True,
 )
 @click.option(
+    "--cython/--no-cython",
+    help="Run Cython on setup. The default is don't run it.",
+    default=False,
+)
+@click.option(
     "-i",
     "--iterations",
     help="Override the number of iterations",
@@ -152,7 +166,12 @@ def get_info(repo) -> dict:
 @click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
 def main(
-    verbose: int, pull: bool, config: str, ref: Optional[str], iterations: Optional[int]
+    verbose: int,
+    pull: bool,
+    cython: bool,
+    config: str,
+    ref: Optional[str],
+    iterations: Optional[int]
 ):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
 
@@ -183,7 +202,7 @@ def main(
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
 
-    rc = setup_environment(verbose)
+    rc = setup_environment(verbose, cython)
     if rc != 0:
         return rc
 
@@ -193,7 +212,9 @@ def main(
     short_name = osp.basename(config)
     if short_name.endswith(".yaml"):
         short_name = short_name[: len(".yaml")]
-    dump_info(repo, timings, verbose, osp.join(results_dir, short_name + ".json"))
+    dump_info(
+        repo, cython, timings, verbose, osp.join(results_dir, short_name + ".json")
+    )
 
     if ref:
         repo.git.checkout(ref)
@@ -203,13 +224,17 @@ def main(
                 f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
             )
 
-        rc = setup_environment(verbose)
+        rc = setup_environment(verbose, cython)
         if rc != 0:
             return rc
 
         timings = run_benchmark(bench_data, verbose, iterations)
         dump_info(
-            repo, timings, verbose, osp.join(results_dir, f"{ref}/{short_name}.json")
+            repo,
+            cython,
+            timings,
+            verbose,
+            osp.join(results_dir, f"{ref}/{short_name}.json"),
         )
 
         # I do not want to recompile when I run many benchmarks for the same branch
@@ -217,20 +242,30 @@ def main(
     return 0
 
 
-def setup_environment(verbose: int) -> int:
+def setup_environment(verbose: int, cython: bool) -> int:
     """
     Make sure Mathics core is set to the right place.
     We will basically run "./setup.py develop".
     """
-    command = [sys.executable, "./setup.py", "develop"]
+    command: list[str] = [sys.executable, "./setup.py", "develop"]
     mathics_dir = osp.join(my_dir, "../", "mathics-core")
-    completed_process = subprocess.run(command, capture_output=True, cwd=mathics_dir)
-    rc = completed_process.returncode
+
+    env: dict = {}
+    if not cython:
+        subprocess.run(["make", "clean-cython"], cwd=mathics_dir)
+
+        # If NO_CYTHON is set, Cython isn't used
+        # Otherwise, it is used
+        env["NO_CYTHON"] = "1"
+
+    completed_process = subprocess.run(
+        command, capture_output=True, cwd=mathics_dir, env=env
+    )
+    rc: int = completed_process.returncode
     if rc != 0:
-        print(
-            f"""Running '{" ".join(command)}' gave nonzero return code. Output was:"""
-        )
-    elif verbose > 1:
+        print(f"""Running '{" ".join(command)}' gave {rc} return code.""")
+    if verbose > 1:
+        print("Output was:")
         print(completed_process.stdout.decode("utf-8"))
     return rc
 
