@@ -121,14 +121,18 @@ def get_info(repo, cython: bool) -> dict:
         locals,
     )
 
+    python_implemetation: str = platform.python_implementation()
+    python_version: str = ".".join(str(number) for number in sys.version_info[:3])
+
     info = {
+        "Has Cython": "Yes" if cython else "No",
         "git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
-        "Platform": sys.platform,
         "Mathics-version": locals["__version__"],
+        "Platform": sys.platform,
         "Processor": platform.machine(),
+        "Python version": f"{python_implementation} {python_version}",
         "System Memory": psutil.virtual_memory().total,
-        "Has Cython": "Yes" if cython else "No",
     }
     return info
 
