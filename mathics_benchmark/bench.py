@@ -42,7 +42,11 @@ my_dir = source_dir()
 
 
 def dump_info(
-    git_repo, timings: dict, verbose: int, output_path: Optional[str]
+    git_repo,
+    cython: bool,
+    timings: dict,
+    verbose: int,
+    output_path: Optional[str],
 ) -> None:
     """Write gathered data if `output_path` given. Otherwise if verbose > 0,
     just print out the gathered data.
@@ -50,7 +54,7 @@ def dump_info(
     `timings`: a dictionary of timing information
     `git_repo`: the git repository for Mathics core.
     """
-    dump_info = {"timings": timings, "info": get_info(git_repo)}
+    dump_info = {"timings": timings, "info": get_info(git_repo, cython)}
     if verbose:
         if output_path:
             print(f"Dumping information to file {output_path}")
@@ -108,7 +112,7 @@ def get_bench_data(config: str) -> dict:
     return bench_data
 
 
-def get_info(repo) -> dict:
+def get_info(repo, cython: bool) -> dict:
 
     locals = {"__version__": "??"}
     exec(
@@ -124,6 +128,7 @@ def get_info(repo) -> dict:
         "Mathics-version": locals["__version__"],
         "Processor": platform.machine(),
         "System Memory": psutil.virtual_memory().total,
+        "Has Cython": "Yes" if cython else "No",
     }
     return info
 
@@ -195,7 +200,9 @@ def main(
     short_name = osp.basename(config)
     if short_name.endswith(".yaml"):
         short_name = short_name[: len(".yaml")]
-    dump_info(repo, timings, verbose, osp.join(results_dir, short_name + ".json"))
+    dump_info(
+        repo, cython, timings, verbose, osp.join(results_dir, short_name + ".json")
+    )
 
     if ref:
         repo.git.checkout(ref)
@@ -211,7 +218,11 @@ def main(
 
         timings = run_benchmark(bench_data, verbose)
         dump_info(
-            repo, timings, verbose, osp.join(results_dir, f"{ref}/{short_name}.json")
+            repo,
+            cython,
+            timings,
+            verbose,
+            osp.join(results_dir, f"{ref}/{short_name}.json"),
         )
 
         # I do not want to recompile when I run many benchmarks for the same branch
@@ -229,7 +240,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
 
     env: dict = {}
     if not cython:
-        subprocess.run(["make", "clean-cython"], cwd=mathics_dir])
+        subprocess.run(["make", "clean-cython"], cwd=mathics_dir)
 
         # If NO_CYTHON is set, Cython isn't used
         # Otherwise, it is used
