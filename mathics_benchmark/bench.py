@@ -15,6 +15,9 @@ on mathics-core at a given git reference.
    python ./mathics_benchmark/bench.py -p bench-1565
  - Override the number of iterations:
    python ./mathics_benchmark/bench.py -i 10 bench-1565
+
+If you installed mathics-benchmark, this file can be called as a binary, e.g.:
+- mathics-bench ContinuedFraction
 """
 
 from git import Repo
