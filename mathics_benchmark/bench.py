@@ -126,7 +126,7 @@ def get_info(repo, cython: bool) -> dict:
 
     info = {
         "Has Cython": "Yes" if cython else "No",
-        "git SHA": repo.head.commit.hexsha[:6],
+        "Git SHA": repo.head.commit.hexsha[:6],
         "Memory Available": psutil.virtual_memory().available,
         "Mathics-version": locals["__version__"],
         "Platform": sys.platform,

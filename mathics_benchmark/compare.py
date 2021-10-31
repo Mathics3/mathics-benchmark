@@ -212,7 +212,7 @@ def worker(
     with open(path) as file:
         object = json.load(file)
 
-        sha_1 = object["info"]["git SHA"]
+        sha_1 = object["info"]["Git SHA"]
 
         if group:
             for query in object["timings"][group]:
@@ -266,7 +266,7 @@ def worker(
         with open(path) as file:
             object = json.load(file)
 
-            sha_2 = object["info"]["git SHA"]
+            sha_2 = object["info"]["Git SHA"]
 
             if group:
                 for query in object["timings"][group]:
