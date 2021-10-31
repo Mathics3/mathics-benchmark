@@ -13,6 +13,8 @@ on mathics-core at a given git reference.
    python ./mathics_benchmark/bench.py -v bench-1565
  - Pull before running the benchmark:
    python ./mathics_benchmark/bench.py -p bench-1565
+ - Override the number of iterations:
+   python ./mathics_benchmark/bench.py -i 10 bench-1565
 """
 
 from git import Repo
@@ -156,6 +158,11 @@ def get_info(repo, cython: bool) -> dict:
     help="Run Cython on setup. The default is don't run it.",
     default=False,
 )
+@click.option(
+    "-i",
+    "--iterations",
+    help="Override the number of iterations",
+)
 @click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
 @click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
 def main(
@@ -164,6 +171,7 @@ def main(
     cython: bool,
     config: str,
     ref: Optional[str],
+    iterations: Optional[int]
 ):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
 
@@ -198,7 +206,7 @@ def main(
     if rc != 0:
         return rc
 
-    timings = run_benchmark(bench_data, verbose)
+    timings = run_benchmark(bench_data, verbose, iterations)
 
     results_dir = osp.join(my_dir, "..", "results")
     short_name = osp.basename(config)
@@ -220,7 +228,7 @@ def main(
         if rc != 0:
             return rc
 
-        timings = run_benchmark(bench_data, verbose)
+        timings = run_benchmark(bench_data, verbose, iterations)
         dump_info(
             repo,
             cython,
@@ -262,7 +270,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
     return rc
 
 
-def run_benchmark(bench_data: dict, verbose: int) -> dict:
+def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
     dictionary.
@@ -275,7 +283,11 @@ def run_benchmark(bench_data: dict, verbose: int) -> dict:
     default_iterations = bench_data.get("iterations", 50)
     timings = {}  # where we accumulate timings from the following loop..
     for category, value in bench_data["categories"].items():
-        iterations = value.get("iterations", default_iterations)
+        iterations = (
+            int(iterations)
+            if iterations
+            else value.get("iterations", default_iterations)
+        )
         if verbose:
             print(f"{iterations} iterations of {category}...")
         group = timings[category] = {}
