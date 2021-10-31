@@ -14,6 +14,10 @@ update:
 	git submodule init
 	git submodule update --remote
 
+#: reset mathics-core to the last commited version
+reset-mathics-core:
+	git submodule update
+
 #: install mathics-benchmark
 install:
 	$(PIP) install -e .
