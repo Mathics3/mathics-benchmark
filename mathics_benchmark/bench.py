@@ -171,7 +171,7 @@ def main(
     cython: bool,
     config: str,
     ref: Optional[str],
-    iterations: Optional[int]
+    iterations: Optional[int],
 ):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
 
@@ -251,7 +251,9 @@ def setup_environment(verbose: int, cython: bool) -> int:
     mathics_dir = osp.join(my_dir, "../", "mathics-core")
 
     env: dict = {}
-    if not cython:
+    if cython:
+        subprocess.run(["make"], cwd=mathics_dir, capture_output=False)
+    else:
         subprocess.run(["make", "clean-cython"], cwd=mathics_dir, capture_output=False)
 
         # If NO_CYTHON is set, Cython isn't used
