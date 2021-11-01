@@ -123,7 +123,7 @@ def get_info(repo, cython: bool) -> dict:
         locals,
     )
 
-    python_implemetation: str = platform.python_implementation()
+    python_implementation: str = platform.python_implementation()
     python_version: str = ".".join(str(number) for number in sys.version_info[:3])
 
     info = {
