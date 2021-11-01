@@ -1,0 +1,49 @@
+# This YAML is not for real benchmarking, this is just an example.
+
+# The default number of iterations (number of times the expressions are going
+# to be executed).
+# This is set to 50 by default.
+# This can be overrided by mathics-bench and mathics-bench-compare with the
+# argument --iterations.
+iterations: 500
+
+# Sometimes you don't want to compare two versions of Mathics, but you want to
+# compare different Mathics code, to see, for example, how to improve the
+# performance of a Mathics package.
+# This is set to false by default and therefore is optional.
+compare-groups: true
+
+# You can include expressions from other YAML files.
+# The YAML that are being included can include other YAML themselves.
+# If they have a number of iteration it is going to be used in their
+# expressions it and isn't going to conflict with the main YAML's number
+# of iterations.
+# This is optional.
+includes:
+  - File1
+  - File2
+
+categories: # the groups of expressions
+  Group 1:
+    # Overrides the number of iterations optionally declared above.
+    # This is optional.
+    # This also can be overrided by --iterations.
+    iterations: 500
+
+    comment: "explanation about what this group is, this is optional"
+    # You can also explain what the group is with usual YAML comments.
+
+    # The list of Mathics expressions that are going to be benchmarked and are
+    # part of this group.
+    # Any expression need to be inside a group.
+    exprs: 
+      # Some Mathics code is interpreted as YAML, so it needs to be quoted.
+      - "[1, 2, 3]"
+
+      # The majority of the expressions don't need quotes, but consistency is
+      # recommended.
+      - 1 + 1
+  Group 2:
+    exprs:
+      - "{1, 2, 3}"
+      - 1 - 1
