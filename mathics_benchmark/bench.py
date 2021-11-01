@@ -252,7 +252,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
 
     env: dict = {}
     if not cython:
-        subprocess.run(["make", "clean-cython"], cwd=mathics_dir)
+        subprocess.run(["make", "clean-cython"], cwd=mathics_dir, capture_output=False)
 
         # If NO_CYTHON is set, Cython isn't used
         # Otherwise, it is used
