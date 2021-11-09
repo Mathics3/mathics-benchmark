@@ -25,4 +25,5 @@ clean:
 
 #: initialize venv
 venv:
+	chmod +x admin-tools/install-venv.sh
 	./admin-tools/install-venv.sh
