@@ -201,11 +201,6 @@ def worker(
     path = (
         f"results/{input}.json" if ref1 == "master" else f"results/{ref1}/{input}.json"
     )
-    try:
-        if ref1 != "master":
-            os.mkdir(f"results/{ref1}")
-    except:
-        pass
 
     if not osp.isfile(path) or force:
         arguments = [input]

@@ -28,6 +28,7 @@ import click
 import importlib
 import json
 import mathics.session
+import os
 import os.path as osp
 import platform
 import psutil
@@ -167,13 +168,13 @@ def get_info(repo, cython: bool) -> dict:
     help="Override the number of iterations",
 )
 @click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
-@click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
+@click.argument("ref", nargs=1, type=click.Path(readable=True), default="master")
 def main(
     verbose: int,
     pull: bool,
     cython: bool,
     config: str,
-    ref: Optional[str],
+    ref: str,
     iterations: Optional[int],
 ):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
@@ -213,9 +214,13 @@ def main(
     if rc != 0:
         return rc
 
+    if ref != "master":
+        os.mkdir(osp.join(results_dir, ref))
+
     timings = run_benchmark(bench_data, verbose)
     dump_info(
         repo,
+        cython,
         timings,
         verbose,
         osp.join(
@@ -259,7 +264,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
     return rc
 
 
-def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> dict:
+def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int] = None) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
     dictionary.
