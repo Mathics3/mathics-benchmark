@@ -1,0 +1,8 @@
+# https://github.com/Mathics3/mathics-core/pull/66
+# says that Plot[SphericalBesselJ] can be slow
+
+categories:
+  PlotSphericalBesselJ:
+    iterations: 1
+    exprs:
+      - Plot[SphericalBesselJ[1, x], {x, 0.1, 10}]
