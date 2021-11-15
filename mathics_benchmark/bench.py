@@ -15,6 +15,9 @@ on mathics-core at a given git reference.
    python ./mathics_benchmark/bench.py -p bench-1565
  - Override the number of iterations:
    python ./mathics_benchmark/bench.py -i 10 bench-1565
+
+If you installed mathics-benchmark, this file can be called as a binary, e.g.:
+- mathics-bench ContinuedFraction
 """
 
 from git import Repo
@@ -25,6 +28,7 @@ import click
 import importlib
 import json
 import mathics.session
+import os
 import os.path as osp
 import platform
 import psutil
@@ -164,13 +168,13 @@ def get_info(repo, cython: bool) -> dict:
     help="Override the number of iterations",
 )
 @click.argument("config", nargs=1, type=click.Path(readable=True), required=True)
-@click.argument("ref", nargs=1, type=click.Path(readable=True), required=False)
+@click.argument("ref", nargs=1, type=click.Path(readable=True), default="master")
 def main(
     verbose: int,
     pull: bool,
     cython: bool,
     config: str,
-    ref: Optional[str],
+    ref: str,
     iterations: Optional[int],
 ):
     """Runs benchmarks specified in CONFIG on Mathics core at git reference REF.
@@ -193,11 +197,15 @@ def main(
 
     bench_data = get_bench_data(config)
     repo = setup_git()
-
-    repo.git.checkout("master")
+    results_dir = osp.join(my_dir, "..", "results")
+    short_name = osp.basename(config)
+    if short_name.endswith(".yaml"):
+        short_name = short_name[: len(".yaml")]
 
     if pull:
         repo.remotes.origin.pull()
+
+    repo.git.checkout(ref)
 
     if verbose:
         print(f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}")
@@ -206,39 +214,23 @@ def main(
     if rc != 0:
         return rc
 
-    timings = run_benchmark(bench_data, verbose, iterations)
+    if ref != "master":
+        os.mkdir(osp.join(results_dir, ref))
 
-    results_dir = osp.join(my_dir, "..", "results")
-    short_name = osp.basename(config)
-    if short_name.endswith(".yaml"):
-        short_name = short_name[: len(".yaml")]
+    timings = run_benchmark(bench_data, verbose)
     dump_info(
-        repo, cython, timings, verbose, osp.join(results_dir, short_name + ".json")
+        repo,
+        cython,
+        timings,
+        verbose,
+        osp.join(
+            results_dir,
+            f"{ref}/{short_name}.json" if ref != "master" else f"{short_name}.json",
+        ),
     )
 
-    if ref:
-        repo.git.checkout(ref)
+    repo.git.checkout("master")
 
-        if verbose:
-            print(
-                f"Mathics git repo {repo.working_dir} at {repo.head.commit.hexsha[:6]}"
-            )
-
-        rc = setup_environment(verbose, cython)
-        if rc != 0:
-            return rc
-
-        timings = run_benchmark(bench_data, verbose, iterations)
-        dump_info(
-            repo,
-            cython,
-            timings,
-            verbose,
-            osp.join(results_dir, f"{ref}/{short_name}.json"),
-        )
-
-        # I do not want to recompile when I run many benchmarks for the same branch
-        # repo.git.checkout("master")
     return 0
 
 
@@ -272,7 +264,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
     return rc
 
 
-def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> dict:
+def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int] = None) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
     dictionary.

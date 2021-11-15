@@ -1,4 +1,5 @@
-"""Generate a bar plot for a particular benchmark.
+"""
+Generate a bar plot for a particular benchmark.
 
 Examples:
 - Compare the "calculator-fns" benchmark in git ref "quickpatterntest" to the master git branch:
@@ -31,6 +32,9 @@ The 3 options bellow are only useful when the benchmarks' results doesn't exist 
   python ./mathics_benchmark/compare.py -v run-all b2e237c0aafd6fad08defc029332b5e328857a81
 
 If environment variable NO_CYTHON is set we skip running Cython in setting up mathics-core.
+
+If you installed mathics-benchmark, this file can be called as a binary, e.g.:
+- mathics-bench-compare Im-Re quickpatterntest
 """
 
 import numpy as np
@@ -197,11 +201,6 @@ def worker(
     path = (
         f"results/{input}.json" if ref1 == "master" else f"results/{ref1}/{input}.json"
     )
-    try:
-        if ref1 != "master":
-            os.mkdir(f"results/{ref1}")
-    except:
-        pass
 
     if not osp.isfile(path) or force:
         arguments = [input]
