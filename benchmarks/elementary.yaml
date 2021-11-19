@@ -1,0 +1,54 @@
+# This tries to measure the overall performance of Mathics
+
+iterations: 100
+
+categories:
+  Inert atoms:
+    exprs:
+      - Integer[1]
+      - Integer[120392261723123312234141]
+      - Real[1.]
+      - Real[434242432525245141421433.]
+      - 3 / 2
+      - Rational[3, 2]
+      - String["Tengo una vaca lechera, no es una vaca cualquiera"]
+  Symbols:
+    exprs:
+      - a
+      - Global`a
+      - LongNameContextOusidePath`a
+      - Pi
+  Expressions:
+    exprs:
+      - F[]
+      - F[x]
+      - F[x1, x2, x3, x4, x5, x6, x7, x8, x9, x0]
+      - F[x, x, x, x, x, x, x, x, x, x]
+      - F[F[F[F[F[F[F[F[F[F[x]]]]]]]]]]
+      - Sqrt[2]
+      - Sqrt[2+Sqrt[3]]
+      - Sin[1]
+      - Sin[x]
+  Rules:
+    exprs:
+      - Rule[x, x^2]
+      - Rule[b, "b"]
+      - Rule["b", b]
+      - Replace[Power[a, 10], Rule[Power[p_, q_], {p,q}]]
+      - Replace[{1, a,a^2,a^3,a^4,a^5,a^6,a^7,a^8,a^9}, Rule[Power[p_,n_], {p,n}]]
+      - F[4]/. F[s_]->None
+      - F[4]/. F[s_Integer]->None
+      - F[4]/. F[s_Integer]->s^2
+      - F[4]/. F[s_Real]->None
+  SameQ:
+    exprs:
+      - SameQ[1, 2]
+      - SameQ[a, b]
+      - SameQ[F[x], F[y]]
+      - SameQ[Sqrt[2],Sqrt[2]]
+      - SameQ[Sqrt[2], a]
+      - SameQ[a, Sqrt[2]]
+      - SameQ[Sqrt[2],Sqrt[3]]
+      - SameQ[{1,2,3,4,5},{a,b,c,d}]
+      - SameQ[{1,2,3,4,5},{1,2,3,4,d}]
+
