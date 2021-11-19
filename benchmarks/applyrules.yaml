@@ -3,6 +3,18 @@
 iterations: 100
 
 categories:
+  Match Patterns:
+    exprs:
+      - MatchQ[Power[a, 10], Power[p_, q_]]
+      - MemberQ[{1, a,a^2,a^3,a^4,a^5,a^6,a^7,a^8,a^9}, Power[p_,n_]]
+      - MemberQ[{1, 3/4, s}, Power[p_,n_]]
+      - MemberQ[{1, a, s}, a]
+      - MemberQ[{1, a, s}, b]
+      - MemberQ[Plus[a,b,c], Plus[a,c]]
+      - MatchQ[F[4], F[s_]]
+      - MatchQ[F[4], F[s_Integer]]
+      - MatchQ[F[4], F[s_Real]]
+  
   Rules:
     exprs:
       - Rule[x, x^2]
@@ -14,3 +26,4 @@ categories:
       - F[4]/. F[s_Integer]->None
       - F[4]/. F[s_Integer]->s^2
       - F[4]/. F[s_Real]->None
+      - Replace[Plus[a,b,c,d], Rule[a+d, l]]
