@@ -215,7 +215,10 @@ def main(
         return rc
 
     if ref != "master":
-        os.mkdir(osp.join(results_dir, ref))
+        try:
+            os.mkdir(osp.join(results_dir, ref))
+        except Exception:
+            pass
 
     timings = run_benchmark(bench_data, verbose)
     dump_info(
