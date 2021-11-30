@@ -267,7 +267,9 @@ def setup_environment(verbose: int, cython: bool) -> int:
     return rc
 
 
-def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int] = None) -> dict:
+def run_benchmark(
+    bench_data: dict, verbose: int, iterations: Optional[int] = None
+) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
     dictionary.
@@ -288,6 +290,12 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int] = No
         if verbose:
             print(f"{iterations} iterations of {category}...")
         group = timings[category] = {}
+
+        if "setup_exprs" in value:
+            for str_expr in value["setup_exprs"]:
+                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                expr.evaluate(session.evaluation)
+
         for str_expr in value["exprs"]:
             expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
             elapsed_time = timeit.timeit(
