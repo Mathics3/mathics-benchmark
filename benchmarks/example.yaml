@@ -13,6 +13,11 @@ iterations: 500
 # This is set to false by default and therefore is optional.
 compare-groups: true
 
+# Whether Cython should be used in benchmarks.
+# The default is false. Usually this is unnecessary and only increases the
+# time necessary to run the benchamrks.
+cython: true
+
 # You can include expressions from other YAML files.
 # The YAML that are being included can include other YAML themselves.
 # If they have a number of iteration it is going to be used in their

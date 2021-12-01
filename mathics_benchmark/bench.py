@@ -160,7 +160,7 @@ def get_info(repo, cython: bool) -> dict:
 @click.option(
     "--cython/--no-cython",
     help="Run Cython on setup. The default is don't run it.",
-    default=False,
+    default=None,
 )
 @click.option(
     "-i",
@@ -172,7 +172,7 @@ def get_info(repo, cython: bool) -> dict:
 def main(
     verbose: int,
     pull: bool,
-    cython: bool,
+    cython: Optional[bool],
     config: str,
     ref: str,
     iterations: Optional[int],
@@ -195,15 +195,21 @@ def main(
     REF defaults to "master".
     """
 
-    bench_data = get_bench_data(config)
+    bench_data: dict = get_bench_data(config)
     repo = setup_git()
-    results_dir = osp.join(my_dir, "..", "results")
-    short_name = osp.basename(config)
+    results_dir: str = osp.join(my_dir, "..", "results")
+    short_name: str = osp.basename(config)
     if short_name.endswith(".yaml"):
         short_name = short_name[: len(".yaml")]
 
     if pull:
         repo.remotes.origin.pull()
+
+    if cython is None:
+        if "cython" in bench_data:
+            cython = bench_data["cython"]
+        else:
+            cython = False
 
     repo.git.checkout(ref)
 

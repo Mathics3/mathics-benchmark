@@ -1,0 +1,6 @@
+# This tries to measure the overall performance of Mathics with Cython
+
+cython: true
+
+includes:
+  - elementary
