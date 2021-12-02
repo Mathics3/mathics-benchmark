@@ -140,10 +140,10 @@ def main(
                 single,
                 logarithmic,
                 cython,
+                iterations,
                 input[11:],
                 ref1,
                 ref2,
-                iterations,
             )
     else:
         worker(
@@ -155,10 +155,10 @@ def main(
             single,
             logarithmic,
             cython,
+            iterations,
             input,
             ref1,
             ref2,
-            iterations,
         )
 
 
@@ -171,10 +171,10 @@ def worker(
     single: bool,
     logarithmic: bool,
     cython: bool,
+    iterations: Optional[int],
     input: str,
     ref1: str,
     ref2: str,
-    iterations: Optional[int],
 ):
     # The percentage diference between a and b is: (a - b) / b * 100
 
@@ -203,10 +203,7 @@ def worker(
     )
 
     if not osp.isfile(path) or force:
-        arguments = [input]
-
-        if ref1 != "master":
-            arguments.append(ref1)
+        arguments = [input, ref1]
 
         if pull:
             arguments.append("-p")
@@ -269,10 +266,7 @@ def worker(
         )
 
         if not osp.isfile(path) or force:
-            arguments = [input]
-
-            if ref2 != "master":
-                arguments.append(ref2)
+            arguments = [input, ref2]
 
             if pull:
                 arguments.append("-p")

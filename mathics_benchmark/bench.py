@@ -226,7 +226,7 @@ def main(
         except Exception:
             pass
 
-    timings = run_benchmark(bench_data, verbose)
+    timings = run_benchmark(bench_data, verbose, iterations)
     dump_info(
         repo,
         cython,
@@ -274,7 +274,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
 
 
 def run_benchmark(
-    bench_data: dict, verbose: int, iterations: Optional[int] = None
+    bench_data: dict, verbose: int, iterations: Optional[int]
 ) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
