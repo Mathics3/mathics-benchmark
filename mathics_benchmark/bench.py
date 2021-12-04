@@ -273,9 +273,7 @@ def setup_environment(verbose: int, cython: bool) -> int:
     return rc
 
 
-def run_benchmark(
-    bench_data: dict, verbose: int, iterations: Optional[int]
-) -> dict:
+def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> dict:
     """Runs the expressions in `bench_data` to get timings and return the
     timings and number of runs associated with the data in a
     dictionary.
@@ -295,21 +293,35 @@ def run_benchmark(
         )
         if verbose:
             print(f"{iterations} iterations of {category}...")
-        group = timings[category] = {}
+        timings[category] = {}
 
         if "setup_exprs" in value:
             for str_expr in value["setup_exprs"]:
                 expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
                 expr.evaluate(session.evaluation)
 
-        for str_expr in value["exprs"]:
-            expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
-            elapsed_time = timeit.timeit(
-                lambda: expr.evaluate(session.evaluation), number=iterations
-            )
+        if value.get("merge-exprs"):
+            elapsed_time: float = 0
+            for str_expr in value["exprs"]:
+                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                elapsed_time += timeit.timeit(
+                    lambda: expr.evaluate(session.evaluation), number=iterations
+                )
             if verbose:
-                print("  %1.6f secs for: %-40s" % (elapsed_time, str_expr))
-            group[str_expr] = (iterations, elapsed_time)
+                print("  %1.6f secs for: %-40s" % (elapsed_time, category))
+            # All expressions need a category, and these expressions should be
+            # displayed with the name the of the category,
+            # so timings[category][category].
+            timings[category][category] = (iterations, elapsed_time)
+        else:
+            for str_expr in value["exprs"]:
+                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                elapsed_time: float = timeit.timeit(
+                    lambda: expr.evaluate(session.evaluation), number=iterations
+                )
+                if verbose:
+                    print("  %1.6f secs for: %-40s" % (elapsed_time, str_expr))
+                timings[category][str_expr] = (iterations, elapsed_time)
         if verbose:
             print()
     return timings

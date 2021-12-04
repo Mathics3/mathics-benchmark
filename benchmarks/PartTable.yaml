@@ -7,6 +7,9 @@ categories:
   # We think that speeding up Part [[ ... ]] is crucial speeking up overall
   # performance
   Part using Table:
+    merge-exprs: true
     exprs:
       - "F = Table[i*j*k, {i, 1, 2}, {j, 1, 2}, {k, 1, 1}]; F[[;; All, 2 ;; 3, 2]] = t;"
+  Part using function:
+    exprs:
       - "F[[;; All, 1 ;; 2, 3 ;; 3]] = k;"
