@@ -101,7 +101,7 @@ def break_string(string: str, number: int) -> str:
 @click.option(
     "--cython/--no-cython",
     help="Run Cython on setup. The default is don't run it.",
-    default=False,
+    default=None,
 )
 @click.option(
     "-i",
@@ -119,7 +119,7 @@ def main(
     force: bool,
     single: bool,
     logarithmic: bool,
-    cython: bool,
+    cython: Optional[bool],
     input: str,
     ref1: str,
     ref2: str,
@@ -211,8 +211,11 @@ def worker(
         if verbose:
             arguments.append("-v")
 
-        if cython:
+        if cython is True:
             arguments.append("--cython")
+        elif cython is False:
+            arguments.append("--no-cython")
+
         if iterations:
             arguments.append("-i")
             arguments.append(iterations)
