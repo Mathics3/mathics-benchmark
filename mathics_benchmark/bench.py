@@ -292,8 +292,8 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> 
     default_iterations: int = bench_data.get("iterations", 50)
     default_python_mode: bool = bench_data.get("python-mode", False)
 
-    if "setup_exprs" in bench_data:
-        for str_expr in bench_data["setup_exprs"]:
+    if "setup-exprs" in bench_data:
+        for str_expr in bench_data["setup-exprs"]:
             if default_python_mode:
                 console.runcode(str_expr)
             else:
@@ -314,8 +314,8 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> 
 
         timings[category] = {}
 
-        if "setup_exprs" in value:
-            for str_expr in value["setup_exprs"]:
+        if "setup-exprs" in value:
+            for str_expr in value["setup-exprs"]:
                 if python_mode:
                     console.runcode(str_expr)
                 else:

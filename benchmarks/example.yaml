@@ -66,7 +66,7 @@ categories: # the groups of expressions
     # If you want some expresions to not appear in the benchmark, put they here.
     # These expressions are going to be executed before the others and
     # only 1 time.
-    setup_exprs:
+    setup-exprs:
       - x = 1
       - y = 2
     exprs:
@@ -86,7 +86,7 @@ categories: # the groups of expressions
     # Overrides global python-mode, this is optional.
     python-mode: true
 
-    setup_exprs:
+    setup-exprs:
       - "from mathics.session import MathicsSession"
       - "session = MathicsSession()"
 
