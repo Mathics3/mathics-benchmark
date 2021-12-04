@@ -22,6 +22,10 @@ cython: true
 # The default is false.
 clean: false
 
+# Whether the timings should be in logarithmic scale.
+# The default is false.
+logarithmic: true
+
 # You can include expressions from other YAML files.
 # The YAML that are being included can include other YAML themselves.
 # If they have a number of iteration it is going to be used in their

@@ -94,9 +94,9 @@ def break_string(string: str, number: int) -> str:
 )
 @click.option(
     "-l",
-    "--logarithmic",
-    help="Use logarithmic scale for times",
-    is_flag=True,
+    "--logarithmic/--scalar",
+    help="The timing scale",
+    default=None,
 )
 @click.option(
     "--cython/--no-cython",
@@ -118,7 +118,7 @@ def main(
     pull: bool,
     force: bool,
     single: bool,
-    logarithmic: bool,
+    logarithmic: Optional[bool],
     cython: Optional[bool],
     input: str,
     ref1: str,
@@ -169,7 +169,7 @@ def worker(
     pull: bool,
     force: bool,
     single: bool,
-    logarithmic: bool,
+    logarithmic: Optional[bool],
     cython: bool,
     iterations: Optional[int],
     input: str,
@@ -189,6 +189,9 @@ def worker(
 
     if clean is None:
         clean = yaml_file.get("clean", False)
+
+    if logarithmic is None:
+        logarithmic = yaml_file.get("logarithmic", False)
 
     compare_groups: bool = yaml_file.get("compare-groups", False)
 
