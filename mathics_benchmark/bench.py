@@ -292,6 +292,14 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> 
     default_iterations: int = bench_data.get("iterations", 50)
     default_python_mode: bool = bench_data.get("python-mode", False)
 
+    if "setup_exprs" in bench_data:
+        for str_expr in bench_data["setup_exprs"]:
+            if default_python_mode:
+                console.runcode(str_expr)
+            else:
+                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                expr.evaluate(session.evaluation)
+
     for category, value in bench_data["categories"].items():
         iterations: int = (
             int(iterations)
