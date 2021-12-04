@@ -18,6 +18,10 @@ compare-groups: true
 # time necessary to run the benchamrks.
 cython: true
 
+# Whether the plot should hide the percentage difference.
+# The default is false.
+clean: false
+
 # You can include expressions from other YAML files.
 # The YAML that are being included can include other YAML themselves.
 # If they have a number of iteration it is going to be used in their

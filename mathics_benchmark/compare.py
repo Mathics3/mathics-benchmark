@@ -70,9 +70,9 @@ def break_string(string: str, number: int) -> str:
 )
 @click.option(
     "-c",
-    "--clean",
-    help="Don't show the difference percentage",
-    is_flag=True,
+    "--clean/--classic",
+    help="Show a plot in the classic way, or hiding the percentage difference",
+    default=None,
 )
 @click.option(
     "-p",
@@ -114,7 +114,7 @@ def break_string(string: str, number: int) -> str:
 def main(
     verbose: int,
     group: Optional[str],
-    clean: bool,
+    clean: Optional[bool],
     pull: bool,
     force: bool,
     single: bool,
@@ -165,7 +165,7 @@ def main(
 def worker(
     verbose: int,
     group: Optional[str],
-    clean: bool,
+    clean: Optional[bool],
     pull: bool,
     force: bool,
     single: bool,
@@ -185,11 +185,12 @@ def worker(
     ref1_times: list[float] = []
     ref2_times: list[float] = []
 
-    yaml_file = bench.get_bench_data(input)
+    yaml_file: dict = bench.get_bench_data(input)
 
-    compare_groups = (
-        "compare-groups" in yaml_file and yaml_file["compare-groups"] == True
-    )
+    if clean is None:
+        clean = yaml_file.get("clean", False)
+
+    compare_groups: bool = yaml_file.get("compare-groups", False)
 
     # The variables bellow are only used if compare_groups is True
     compare_groups_times: list[list[float]] = []
