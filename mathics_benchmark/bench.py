@@ -21,10 +21,11 @@ If you installed mathics-benchmark, this file can be called as a binary, e.g.:
 """
 
 from git import Repo
-from typing import Optional
-
+from typing import Optional, Tuple
 from pathlib import Path
+
 import click
+import code
 import importlib
 import json
 import mathics.session
@@ -283,30 +284,48 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> 
     importlib.reload(mathics.session)
     session = mathics.session.MathicsSession(add_builtin=True, catch_interrupt=False)
 
-    default_iterations = bench_data.get("iterations", 50)
-    timings = {}  # where we accumulate timings from the following loop..
+    console = code.InteractiveInterpreter()
+
+    # where we accumulate timings from the following loop
+    timings: dict[dict[Tuple[int, float]]] = {}
+
+    default_iterations: int = bench_data.get("iterations", 50)
+    default_python_mode: bool = bench_data.get("python-mode", False)
+
     for category, value in bench_data["categories"].items():
-        iterations = (
+        iterations: int = (
             int(iterations)
             if iterations
             else value.get("iterations", default_iterations)
         )
+
+        python_mode: bool = value.get("python-mode", default_python_mode)
+
         if verbose:
             print(f"{iterations} iterations of {category}...")
+
         timings[category] = {}
 
         if "setup_exprs" in value:
             for str_expr in value["setup_exprs"]:
-                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
-                expr.evaluate(session.evaluation)
+                if python_mode:
+                    console.runcode(str_expr)
+                else:
+                    expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                    expr.evaluate(session.evaluation)
 
         if value.get("merge-exprs"):
             elapsed_time: float = 0
             for str_expr in value["exprs"]:
-                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
-                elapsed_time += timeit.timeit(
-                    lambda: expr.evaluate(session.evaluation), number=iterations
-                )
+                if python_mode:
+                    elapsed_time += timeit.timeit(
+                        lambda: console.runcode(str_expr), number=iterations
+                    )
+                else:
+                    expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                    elapsed_time += timeit.timeit(
+                        lambda: expr.evaluate(session.evaluation), number=iterations
+                    )
             if verbose:
                 print("  %1.6f secs for: %-40s" % (elapsed_time, category))
             # All expressions need a category, and these expressions should be
@@ -315,10 +334,15 @@ def run_benchmark(bench_data: dict, verbose: int, iterations: Optional[int]) -> 
             timings[category][category] = (iterations, elapsed_time)
         else:
             for str_expr in value["exprs"]:
-                expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
-                elapsed_time: float = timeit.timeit(
-                    lambda: expr.evaluate(session.evaluation), number=iterations
-                )
+                if python_mode:
+                    elapsed_time: float = timeit.timeit(
+                        lambda: console.runcode(str_expr), number=iterations
+                    )
+                else:
+                    expr = parse(session.definitions, MathicsSingleLineFeeder(str_expr))
+                    elapsed_time: float = timeit.timeit(
+                        lambda: expr.evaluate(session.evaluation), number=iterations
+                    )
                 if verbose:
                     print("  %1.6f secs for: %-40s" % (elapsed_time, str_expr))
                 timings[category][str_expr] = (iterations, elapsed_time)

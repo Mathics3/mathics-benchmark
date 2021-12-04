@@ -26,6 +26,12 @@ clean: false
 # The default is false.
 logarithmic: true
 
+# Whether the expressions should be in Python instead of Mathics.
+# Note: there is no automatic import in Python, you need to import everything
+# you use.
+# The default is false.
+python-mode: false
+
 # You can include expressions from other YAML files.
 # The YAML that are being included can include other YAML themselves.
 # If they have a number of iteration it is going to be used in their
@@ -76,3 +82,13 @@ categories: # the groups of expressions
 
     exprs:
       - 0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 12 + 13 + 14 + 15 + 16
+  Group 4:
+    # Overrides global python-mode, this is optional.
+    python-mode: true
+
+    setup_exprs:
+      - "from mathics.session import MathicsSession"
+      - "session = MathicsSession()"
+
+    exprs:
+      - "session.evaluate('1 + 1')"
