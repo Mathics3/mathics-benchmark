@@ -1,0 +1,132 @@
+python-mode: true
+
+setup-exprs:
+  - |
+    from mathics.session import MathicsSession
+    from mathics.core.expression import Expression
+    from mathics.core.atoms import Integer
+    from mathics.core.symbols import Symbol, SymbolList
+    from mathics.algorithm.parts import walk_parts
+
+    SymbolAll = Symbol("All")
+
+    session = MathicsSession(add_builtin=False)
+
+    global_idx = 0
+  - |
+    def build_basic_list(n):
+      global global_idx
+      old_global_idx = global_idx
+      global_idx = global_idx + n
+      return Expression(
+        SymbolList, *[Integer(k) for k in range(old_global_idx, global_idx)]
+      )
+
+    def build_deep_list(deep, n):
+      if deep == 1:
+        return build_basic_list(n)
+
+      return Expression(
+        SymbolList,
+        *[build_deep_list(deep - 1, n) for k in range(0, n)],
+      )
+
+    deep_array = build_deep_list(5, 6)
+    shallow_array = build_deep_list(1, 60)
+
+categories:
+  Deep copy:
+    exprs:
+      - deep_array.copy()
+
+  Shallow copy:
+    exprs:
+      - shallow_array.copy()
+
+  Assign deep element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = deep_array.copy()
+      - global_idx += 1
+    exprs:
+      - |
+        walk_parts(
+          [copy],
+          [Integer(1), Integer(3), Integer(2), Integer(1), Integer(2)],
+          session.evaluation,
+          Integer(global_idx),
+        )
+
+  Assign shallow element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = shallow_array.copy()
+      - global_idx += 1
+    exprs:
+      - |
+        walk_parts(
+          [copy],
+          [Integer(37)],
+          session.evaluation,
+          Integer(global_idx)
+        )
+    
+  Acess deep element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = deep_array.copy()
+    exprs:
+      - |
+        walk_parts(
+          [copy],
+          [Integer(1), Integer(3), Integer(2), Integer(1), Integer(2)],
+          session.evaluation,
+          None,
+        )
+
+  Acess shallow element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = shallow_array.copy()
+    exprs:
+      - walk_parts([copy], [Integer(37)], session.evaluation, None)
+  
+  Acess block element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = deep_array.copy()
+      - global_idx += 1
+    exprs:
+      - |
+        walk_parts(
+          [copy],
+          [
+            Integer(1),
+            Expression("System`Span", Integer(1), Integer(3), Integer(2)),
+            SymbolAll,
+            Integer(2),
+            Integer(1),
+          ],
+          session.evaluation,
+          None,
+        )
+
+  Update block element:
+    merge-exprs: true
+    setup-exprs:
+      - copy = deep_array.copy()
+      - global_idx += 1
+    exprs:
+      - |
+        walk_parts(
+          [copy],
+          [
+            Integer(1),
+            Expression("System`Span", Integer(1), Integer(3), Integer(2)),
+            SymbolAll,
+            Integer(2),
+            Integer(1),
+          ],
+          session.evaluation,
+          Integer(global_idx),
+        )
