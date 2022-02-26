@@ -247,9 +247,9 @@ def main(
 def setup_environment(verbose: int, cython: bool) -> int:
     """
     Make sure Mathics core is set to the right place.
-    We will basically run "./setup.py develop".
+    We will basically run "pip install -e .".
     """
-    command: list[str] = [sys.executable, "./setup.py", "develop"]
+    command: list[str] = [sys.executable, "-m", "pip", "install", "-e", "."]
     mathics_dir = osp.join(my_dir, "../", "mathics-core")
 
     env: dict = {}
