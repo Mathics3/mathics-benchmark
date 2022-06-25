@@ -1,0 +1,26 @@
+# This tries to measure the cost of evaluating nested expressions.
+
+iterations: 10
+cython: false
+python-mode: false
+
+categories:
+  Fold:
+    iterations: 50
+    setup-exprs:
+     - Clear[F]
+     - Clear[x]
+    exprs:
+     - Fold[F, x, Range[500]]
+  Fold and Eval:
+    iterations: 50
+    setup-exprs:
+      - a = Fold[F, 0, Range[150]];
+      - Clear[F];
+      - F[x_,y_]:=x+y;a
+    exprs:
+      - a
+  Do set:
+    iterations: 50
+    exprs:
+      - Do[F[i]:=i,{i, 1000}]
