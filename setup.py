@@ -31,6 +31,7 @@ setup(
             "mathics-bench-compare = mathics_benchmark.compare:main",
         ]
     },
+    packages=["mathics_benchmark", ],
     install_requires=[
         "click",
         "psutil",
